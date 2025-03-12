@@ -19,13 +19,14 @@ const HomePage = () => {
       {/* Top User Info Box */}
       <div className="flex flex-wrap  items-center text-white bg-[#071824] p-8 border-b border-gray-700  shadow">
         <p className="font-medium">USER: FTADMIN</p>
-        <div className="flex flex-wrap gap-4 ml-auto">
+        <div className="flex flex-wrap gap-4 ml-auto text-white">
           <input
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
-            className="border-1 rounded-lg px-3 py-1 bg-[#1a2936]"
+            className="border-1 rounded-lg px-3 py-1 bg-[#1a2936] text-white"
             placeholder="From Date"
+            style={{ WebkitAppearance: "none", colorScheme: "dark" }}
           />
           <input
             type="date"
@@ -33,6 +34,7 @@ const HomePage = () => {
             onChange={(e) => setToDate(e.target.value)}
             className="border rounded-lg px-3 py-1 bg-[#1a2936]"
             placeholder="To Date"
+            style={{ WebkitAppearance: "none", colorScheme: "dark" }}
           />
           <label className="flex items-center space-x-2">
             <input
