@@ -25,7 +25,7 @@ export const Sidebar = () => {
       >
         <div className="p-4 border-b border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">FTROHIT</h2>
+            <h2 className="text-lg font-semibold">FTADMIN</h2>
             <span className="text-sm text-gray-400">Broker</span>
           </div>
           <div className="relative">
@@ -41,8 +41,8 @@ export const Sidebar = () => {
         <div className="p-4 border-b border-gray-700">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-2">
-              <span>Rohit broker</span>
-              <span className="text-sm text-gray-400">FTROHIT</span>
+              <span>FTADMIN</span>
+              <span className="text-sm text-gray-400">FTADMIN</span>
             </div>
             <span className="text-sm text-gray-400">Broker</span>
           </div>

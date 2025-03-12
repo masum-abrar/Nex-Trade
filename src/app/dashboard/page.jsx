@@ -24,14 +24,14 @@ const HomePage = () => {
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
-            className="border rounded px-3 py-1"
+            className="border-1 rounded-lg px-3 py-1 bg-[#1a2936]"
             placeholder="From Date"
           />
           <input
             type="date"
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
-            className="border rounded px-3 py-1"
+            className="border rounded-lg px-3 py-1 bg-[#1a2936]"
             placeholder="To Date"
           />
           <label className="flex items-center space-x-2">

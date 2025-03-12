@@ -19,7 +19,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="bg-[#1A2C38] text-white p-4">
+    <nav className="bg-[#1A2C38] text-white p-4 border-b border-gray-700">
       <div className="container mx-auto">
         {/* Mobile View */}
         <div className="md:hidden flex items-center justify-between">
@@ -67,7 +67,7 @@ const Navbar = () => {
         )}
 
         {/* Desktop View */}
-        <div className="hidden md:flex items-center justify-between">
+        <div className="hidden md:flex items-center justify-between ">
           <div className="flex items-center space-x-6">
             {navItems.map((item) => (
               <Link
