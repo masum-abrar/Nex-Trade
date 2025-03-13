@@ -7,7 +7,9 @@ import Navbar from '../Components/Navbar';
 const Page = () => {
   return (
     <div className="flex ">
-      <Sidebar />
+    <div className='h-full'>
+    <Sidebar />
+    </div>
       <div className="flex-1">
         <Navbar />
         <div className="  bg-[#1A2C38] h-screen">
