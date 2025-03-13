@@ -21,7 +21,7 @@ export const Sidebar = () => {
       <div
         className={`${
           isSidebarOpen ? "translate-x-0 z-50" : "-translate-x-full  "
-        } md:translate-x-0 fixed md:static w-64 bg-[#071824] text-white h-screen  flex flex-col transition-transform duration-300 ease-in-out z-40 border-r-2  border-gray-500  `}
+        } md:translate-x-0 fixed md:static w-64 bg-[#071824] text-white   flex flex-col transition-transform duration-300 ease-in-out z-40 border-r-2  border-gray-500  `}
       >
         <div className="p-4 border-b border-gray-700">
           <div className="flex items-center justify-between mb-4">

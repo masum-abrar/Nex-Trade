@@ -10,7 +10,7 @@ const HomePage = () => {
     const [toDate, setToDate] = useState("");
   
   return (
-    <div className="flex ">
+    <div className="flex  ">
       <Sidebar />
       <div className="flex-1">
         <Navbar />
