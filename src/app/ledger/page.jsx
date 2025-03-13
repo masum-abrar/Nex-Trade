@@ -1,19 +1,5 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
-
-// const StatsBoxes = () => {
-//   return (
-//     <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-//       {['Active Users', 'Demo Users', 'Net Users'].map((title, index) => (
-//         <div key={index} className="bg-gray-700 p-4 rounded-lg text-center shadow-md">
-//           <h3 className="text-lg font-semibold">{title}</h3>
-//           <p className="text-2xl font-bold">0</p>
-//         </div>
-//       ))}
-//     </div>
-//   );
-// };
-
 const ActionLogsTable = () => {
   return (
     <div className="p-6">
