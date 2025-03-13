@@ -15,7 +15,7 @@ const Navbar = () => {
     { label: "USERS", href: "/users" },
     { label: "ACT LEDGER", href: "/ledger" },
     { label: "ACCOUNTS", href: "/accounts" },
-    { label: "PAYIN-OUT", href: "/payin-out" },
+    { label: "PAYIN-OUT", href: "/payinout" },
   ];
 
   return (
