@@ -1,6 +1,7 @@
-'use client'
+
 import React from 'react';
-import Navbar from '../components/Navbar';
+import Navbar from '../Components/Navbar';
+
 
 
 
@@ -8,7 +9,7 @@ import Navbar from '../components/Navbar';
 const Page = () => {
   return (
     <div className="flex flex-col min-h-screen bg-[#071824] text-white ">
-      <Navbar />
+      <Navbar/>
    
      <div className="container mx-auto p-4">
      <div className="p-6 rounded-lg shadow-md ">
