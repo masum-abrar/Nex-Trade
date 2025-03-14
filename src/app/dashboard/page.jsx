@@ -26,11 +26,7 @@ const HomePage = () => {
   onChange={(e) => setFromDate(e.target.value)}
   className="border rounded-lg px-3 py-1 bg-[#1a2936] text-white w-full md:w-auto"
   placeholder="From Date"
-  style={{
-    WebkitAppearance: "textfield", // Enables the default icon
-    appearance: "textfield",
-    colorScheme: "dark",
-  }}
+ 
 />
 <input
   type="date"
