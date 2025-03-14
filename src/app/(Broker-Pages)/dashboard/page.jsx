@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
-import Sidebar from '../Components/Sidebar';
-import Navbar from '../Components/Navbar';
+import Sidebar from '../../Components/Sidebar';
+import Navbar from '../../Components/Navbar';
 import { useState } from 'react';
 
 const HomePage = () => {
