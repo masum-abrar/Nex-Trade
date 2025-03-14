@@ -95,7 +95,7 @@ const Page = () => {
             </table>
           </div>
 
-          {/* Pagination Controls */}
+          {/* Pagination */}
           <div className="flex justify-between items-center mt-6">
             <span className="text-gray-300">Page 1 of 3</span>
             <div>

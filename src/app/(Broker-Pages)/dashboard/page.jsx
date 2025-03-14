@@ -14,7 +14,7 @@ const HomePage = () => {
       <Sidebar />
       <div className="flex-1">
         <Navbar />
-        {/* Main content goes here */}
+       
         <div className="flex flex-col">
       {/* Top User Info Box */}
       <div className="flex flex-wrap  items-center text-white bg-[#071824] p-8 border-b border-gray-700  shadow">

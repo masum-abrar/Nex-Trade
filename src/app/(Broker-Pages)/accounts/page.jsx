@@ -4,14 +4,14 @@ import Navbar from "../Components/Navbar";
 const Page = () => {
   return (
     <div className="min-h-screen bg-[#071824] text-white">
-      {/* Navbar Component */}
+     
       <Navbar />
 
-      {/* Main Content */}
+    
       <div className="container mx-auto px-4 py-6">
        
 
-        {/* Date Filters */}
+       
         <div className="flex flex-wrap gap-4 justify-center mb-6">
           <input
             type="date"

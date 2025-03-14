@@ -6,13 +6,13 @@ const LedgerRequests = () => {
     <div className="min-h-screen bg-[#071824] text-white">
       <Navbar />
 
-      {/* Container */}
+    
       <div className="container mx-auto p-6">
         <h1 className="text-3xl font-semibold text-center mb-6">
           Ledger Requests
         </h1>
 
-        {/* Action Buttons */}
+       
         <div className="flex justify-center gap-4 mb-6">
           <button className="bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-blue-700">
             Deposits

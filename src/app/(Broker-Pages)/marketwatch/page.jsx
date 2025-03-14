@@ -102,7 +102,7 @@ const MarketPage = () => {
         </a>
       </div>
 
-      {/* Responsive Table & Cards */}
+      {/* Table & Cards */}
       <div className="p-4 pt-0">
         {/* Desktop Table */}
         <div className="hidden md:block">
@@ -142,7 +142,7 @@ const MarketPage = () => {
         </table>
         </div>
 
-        {/* Mobile View (Card Format) */}
+        {/* Mobile View  */}
         <div className="md:hidden space-y-4">
           {marketDatas.map((data, index) => (
             <div key={index} className="border border-gray-700 p-4 rounded-lg bg-gray-800">

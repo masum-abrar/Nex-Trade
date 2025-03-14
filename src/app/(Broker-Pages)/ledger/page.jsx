@@ -15,7 +15,7 @@ const Page = () => {
      <div className="p-6 rounded-lg shadow-md ">
       <h1 className="text-xl font-bold mb-4">Action Logs</h1>
 
-      {/* Filters */}
+     
       <div className="flex flex-wrap gap-4 mb-4">
         <input type="date" className="p-2 rounded bg-gray-700 text-white" />
         <input type="date" className="p-2 rounded bg-gray-700 text-white" />

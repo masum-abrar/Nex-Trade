@@ -9,7 +9,7 @@ export const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile Toggle Button */}
+    
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         className="md:hidden fixed top-4 left-4 z-50 text-white"

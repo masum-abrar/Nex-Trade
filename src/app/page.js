@@ -1,4 +1,4 @@
-import HomePage from "./dashboard/page";
+import HomePage from "./(Broker-Pages)/dashboard/page";
 
 
 export default function Home() {
