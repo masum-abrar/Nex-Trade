@@ -11,7 +11,8 @@ const MarketPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch("/api-scrip-master-one.xlsx"); // Fetch from public folder
+      const response = await fetch("https://nex-trade.vercel.app/api-scrip-master-one.xlsx");
+      // Fetch from public folder
       const blob = await response.blob();
       const reader = new FileReader();
 
