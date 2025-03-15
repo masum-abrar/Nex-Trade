@@ -1,93 +1,85 @@
-'use client';
-import React from 'react';
-import Navbar from '../../Components/Navbar';
-const marketDatas = [
-    {
-      name: 'AARTIIND',
-      date: '27 MAR',
-      qty: 0,
-      bid: 389.25,
-      ask: 389.8,
-      ltp: 389.8,
-      change: '-3.35 (-0.85)',
-      color: 'text-green-400',
-    },
-    {
-      name: 'BANKNIFTY',
-      date: '27 MAR',
-      qty: 0,
-      bid: 48179.85,
-      ask: 48192.05,
-      ltp: 48192.1,
-      change: '-21.85 (-0.05)',
-      color: 'text-green-400',
-    },
-    {
-      name: 'NIFTY',
-      date: '27 MAR',
-      qty: 0,
-      bid: 22509.95,
-      ask: 22512.7,
-      ltp: 22507.4,
-      change: '-22.95 (-0.10)',
-      color: 'text-red-400',
-    },
-  ];
-  
-const marketData = [
-    {
-      script: 'AARTIIND 27 MAR',
-      bid: 393.4,
-      ask: 394,
-      ltp: 393.45,
-      ch: -0.80,
-      chp: -0.20,
-      high: 398.65,
-      low: 385.5,
-      open: 398.55,
-      close: 394.25,
-      time: '04:45:24 pm',
-    },
-    {
-      script: 'BANKNIFTY 27 MAR',
-      bid: 48215,
-      ask: 48232.25,
-      ltp: 48215,
-      ch: 215.75,
-      chp: 0.45,
-      high: 48330,
-      low: 47939.7,
-      open: 48055.05,
-      close: 47999.5,
-      time: '04:46:57 pm',
-    },
-    {
-      script: 'NIFTY 27 MAR',
-      bid: 22520.05,
-      ask: 22526.95,
-      ltp: 22527,
-      ch: -37.35,
-      chp: -0.17,
-      high: 22618.8,
-      low: 22380.2,
-      open: 22580,
-      close: 22564.3,
-      time: '04:45:24 pm',
-    },
-  ];
+"use client";
+import React, { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
+import Navbar from "../../Components/Navbar";
 
 const MarketPage = () => {
+  const [data, setData] = useState([]); // Original data from Excel
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]); // Store selected items
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch("/api-scrip-master-one.xlsx"); // Fetch from public folder
+      const blob = await response.blob();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const arrayBuffer = e.target.result;
+        const wb = XLSX.read(arrayBuffer, { type: "array" });
+        const wsName = wb.SheetNames[0];
+        const ws = wb.Sheets[wsName];
+        const jsonData = XLSX.utils.sheet_to_json(ws);
+        setData(jsonData);
+      };
+
+      reader.readAsArrayBuffer(blob);
+    };
+
+    fetchData();
+  }, []);
+
+  // Filter data based on search input
+  const filteredData = searchTerm
+    ? data.filter((row) =>
+        row.SEM_EXM_EXCH_ID?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
+
+  // Handle checkbox toggle
+  const handleCheckboxToggle = (selectedRow) => {
+    setSelectedItems((prevSelected) => {
+      // Check if the row is already selected
+      const isAlreadySelected = prevSelected.some(
+        (item) => item.SEM_EXM_EXCH_ID === selectedRow.SEM_EXM_EXCH_ID
+      );
+
+      if (isAlreadySelected) {
+        // Remove item if already selected
+        return prevSelected.filter((item) => item.SEM_EXM_EXCH_ID !== selectedRow.SEM_EXM_EXCH_ID);
+      } else {
+        // Add item if not selected
+        return [...prevSelected, selectedRow];
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen bg-[#071824] text-white">
       <Navbar />
 
       {/* Menu */}
       <div className="flex space-x-4 overflow-x-auto p-4 mt-6">
-      {['NSEFUT', 'NSEOPT', 'MCXFUT', 'MCXOPT', 'NSE-EQ', 'BSE-FUT', 'BSE-OPT', 'CRYPTO', 'FOREX', 'COMEX', 'GLOBALINDEX'].map((item, index) => (
+        {[
+          "NSEFUT",
+          "NSEOPT",
+          "MCXFUT",
+          "MCXOPT",
+          "NSE-EQ",
+          "BSE-FUT",
+          "BSE-OPT",
+          "CRYPTO",
+          "FOREX",
+          "COMEX",
+          "GLOBALINDEX",
+        ].map((item, index) => (
           <a
             key={index}
             href="#"
-            className={`px-4 py-2 ${index === 0 ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-400'} hover:text-white`}
+            className={`px-4 py-2 ${
+              index === 0 ? "border-b-2 border-blue-500 text-blue-500" : "text-gray-400"
+            } hover:text-white`}
           >
             {item}
           </a>
@@ -95,70 +87,74 @@ const MarketPage = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="p-3 flex items-center space-x-3 bg-[#213743] m-4 rounded-sm">
-        <img className="w-6 h-6" src="https://img.icons8.com/ios-glyphs/30/FFFFFF/search--v1.png" alt="search" />
-        <a href="#" className="text-white hover:underline text-sm">
-          Search & Add New Symbols
-        </a>
+      <div
+        className="p-3 flex items-center space-x-3 bg-[#213743] m-4 rounded-sm cursor-pointer"
+        onClick={() => setShowSearchResults(true)}
+      >
+        <img
+          className="w-6 h-6"
+          src="https://img.icons8.com/ios-glyphs/30/FFFFFF/search--v1.png"
+          alt="search"
+        />
+        <input
+          type="text"
+          placeholder="Search & Add New Symbols"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full p-2 border rounded-md bg-[#1A2C38] text-white placeholder-gray-400"
+          autoFocus
+        />
       </div>
 
-      {/* Table & Cards */}
-      <div className="p-4 pt-0">
-        {/* Desktop Table */}
-        <div className="hidden md:block">
-        <table className="w-full text-left border-collapse">
+      {/* Search Results with Checkboxes */}
+      {showSearchResults && searchTerm && (
+        <div className="p-4 bg-[#1A2C38] rounded-md mx-4">
+          {filteredData.length > 0 ? (
+            <ul className="space-y-2">
+              {filteredData.map((row, i) => (
+                <li key={i} className="flex items-center justify-between p-2 border-b border-gray-600">
+                  <span>{row.SEM_EXM_EXCH_ID || "N/A"}</span>
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4"
+                    checked={selectedItems.some((item) => item.SEM_EXM_EXCH_ID === row.SEM_EXM_EXCH_ID)}
+                    onChange={() => handleCheckboxToggle(row)}
+                  />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-center text-gray-400">No results found</p>
+          )}
+        </div>
+      )}
+
+      {/* Table Showing Only Selected Items */}
+      <div className="p-4">
+        <table className="border-collapse border border-gray-300 w-full">
           <thead>
-            <tr className="bg-[#213743] text-white text-sm">
-              <th className="p-4 rounded-l-xl">Script</th>
-              <th className="p-2">Bid</th>
-              <th className="p-4">Ask</th>
-              <th className="p-4">Ltp</th>
-              <th className="p-4">Ch</th>
-              <th className="p-4">Chp</th>
-              <th className="p-4">High</th>
-              <th className="p-4">Low</th>
-              <th className="p-4">Open</th>
-              <th className="p-4">Close</th>
-              <th className="p-4 rounded-r-xl">Time</th>
+            <tr className="bg-gray-800 text-white">
+              <th className="border p-2">Exchange ID</th>
+              <th className="border p-2">Security ID</th>
             </tr>
           </thead>
           <tbody>
-            {marketData.map((data, index) => (
-              <tr key={index} className="border-b border-gray-700">
-                <td className="p-4 text-white">{data.script}</td>
-                <td className={`p-4 ${data.bid > data.ask ? 'text-green-400' : 'text-red-400'}`}>{data.bid}</td>
-                <td className={`p-4 ${data.ask > data.bid ? 'text-red-400' : 'text-green-400'}`}>{data.ask}</td>
-                <td className="p-4 text-white">{data.ltp}</td>
-                <td className={`p-4 ${data.ch < 0 ? 'text-red-400' : 'text-green-400'}`}>{data.ch}</td>
-                <td className={`p-4 ${data.chp < 0 ? 'text-red-400' : 'text-green-400'}`}>{data.chp}</td>
-                <td className="p-4 text-white">{data.high}</td>
-                <td className="p-4 text-white">{data.low}</td>
-                <td className="p-4 text-white">{data.open}</td>
-                <td className="p-4 text-white">{data.close}</td>
-                <td className="p-4 text-gray-400">{data.time}</td>
+            {selectedItems.length > 0 ? (
+              selectedItems.map((row, i) => (
+                <tr key={i} className="border">
+                  <td className="border p-2">{row.SEM_EXM_EXCH_ID || "N/A"}</td>
+                  <td className="border p-2">{row.SEM_SMST_SECURITY_ID || "N/A"}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="2" className="text-center p-2 text-gray-400">
+                  No selected items
+                </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        </div>
-
-        {/* Mobile View  */}
-        <div className="md:hidden space-y-4">
-          {marketDatas.map((data, index) => (
-            <div key={index} className="border border-gray-700 p-4 rounded-lg bg-gray-800">
-              <div className="flex justify-between">
-                <p className="text-lg font-bold">{data.name}</p>
-                <p className="text-sm text-gray-400">Qty: {data.qty}</p>
-              </div>
-             
-              <div className="flex justify-between mt-2">
-                <p className="text-lg">LTP: <span className={data.color}>{data.ltp}</span></p>
-                <p className={data.color}>{data.change}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
       </div>
     </div>
   );
