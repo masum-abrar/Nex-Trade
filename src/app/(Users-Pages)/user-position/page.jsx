@@ -1,0 +1,100 @@
+'use client'
+
+import React, { useState } from "react";
+import { FaChartBar, FaShoppingCart, FaBolt, FaCog,FaChevronDown  } from "react-icons/fa";
+import BottomNav from "../BotomNav";
+
+const Page = () => {
+    const [activeTab, setActiveTab] = useState("Position");
+     const [showFunds, setShowFunds] = useState(false);
+  return (
+    <div className="bg-gray-900 text-white min-h-screen flex flex-col justify-between">
+   
+
+      {/* Position Section */}
+      <div  className="p-4  container mx-auto">
+        <div className="p-4 border-b border-gray-700 container mx-auto relative">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold">Position</h2>
+                <button onClick={() => setShowFunds(!showFunds)} className="text-white focus:outline-none">
+                  <FaChevronDown className={`transition-transform ${showFunds ? "rotate-180" : "rotate-0"}`} />
+                </button>
+              </div>
+              
+              {showFunds && (
+                <div className="p-4 bg-gray-800 border-t border-gray-700 mt-2  w-full left-0 top-0 shadow-lg">
+                  <h2 className="text-lg font-semibold">Funds</h2>
+                  <div className="flex lg:justify-between flex-col mt-2 gap-4">
+                    <div className="flex justify-between">
+                      <div>
+                        <p className="text-sm">Ledger Balance</p>
+                        <p className="text-xl font-bold">₹7,243,81</p>
+                      </div>
+                      <div>
+                        <p className="text-sm">Margin Available</p>
+                        <p className="text-lg">₹0</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-between">
+                      <div>
+                        <p className="text-sm">Margin Used</p>
+                        <p className="text-lg">₹0</p>
+                      </div>
+                      <div>
+                        <p className="text-sm">M2M Available</p>
+                        <p className="text-lg">₹0</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+      </div>
+      <div className="flex justify-between space-x-6 text-blue-400 p-4 font-semibold">
+        {["Closed", "Position", "Active"].map((tab) => (
+          <span
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`pb-1 cursor-pointer ${
+              activeTab === tab ? "border-b-2 border-blue-400" : "text-gray-500"
+            }`}
+          >
+            {tab}
+          </span>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div className="mt-4 text-white p-4 ">
+        {activeTab === "Closed" && <p>Showing Closed Orders...</p>}
+        {activeTab === "Position" && <div className="bg-gray-800 p-4 rounded-md">
+            
+          <div className="text-center">
+          <h1>Total P&L</h1>
+          <p className="text-green-500">0.00</p>
+          </div>
+            
+            </div>}
+        {activeTab === "Active" && <p>Showing Active Orders...</p>}
+      </div>
+      <div className="flex-1 flex flex-col  justify-center text-center">
+       
+      
+        <div className="flex flex-col items-center">
+          <img
+            src="/mnt/data/user-order.PNG"
+            alt="No Pending Orders"
+            className="w-32 h-32 object-contain"
+          />
+          <p className="text-lg font-semibold mt-4">No Position</p>
+          <p className="text-sm text-gray-400">Place an order from watchlist</p>
+        </div>
+      </div>
+
+      {/* Bottom Navigation */}
+   <BottomNav/>
+    </div>
+  );
+};
+
+export default Page;

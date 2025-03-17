@@ -1,6 +1,8 @@
 "use client";
+
 import { useState } from "react";
 import { FaTrash, FaPlus, FaChartBar, FaShoppingCart, FaBolt, FaCog } from "react-icons/fa";
+import BottomNav from "../BotomNav";
 
 const MarketWatch = () => {
   const [search, setSearch] = useState("");
@@ -82,24 +84,7 @@ const MarketWatch = () => {
       </div>
 
       {/* Bottom Navigation */}
-      <div className=" bottom-0 w-full bg-gray-900 flex justify-around py-3 border-t border-gray-700">
-        <button className="flex flex-col items-center text-gray-400 hover:text-white transition">
-          <FaChartBar size={20} />
-          <span className="text-xs">Market</span>
-        </button>
-        <button className="flex flex-col items-center text-gray-400 hover:text-white transition">
-          <FaShoppingCart size={20} />
-          <span className="text-xs">Orders</span>
-        </button>
-        <button className="flex flex-col items-center text-gray-400 hover:text-white transition">
-          <FaBolt size={20} />
-          <span className="text-xs">Position</span>
-        </button>
-        <button className="flex flex-col items-center text-gray-400 hover:text-white transition">
-          <FaCog size={20} />
-          <span className="text-xs">Settings</span>
-        </button>
-      </div>
+    <BottomNav/>
     </div>
   );
 };

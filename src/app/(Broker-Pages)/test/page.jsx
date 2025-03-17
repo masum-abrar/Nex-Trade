@@ -1,57 +1,63 @@
-"use client";
-
+'use client'
 import { useEffect, useState } from "react";
-import * as XLSX from "xlsx";
+import pako from "pako"; // Ensure pako is installed: npm install pako
 
-export default function ExcelTable() {
-  const [data, setData] = useState([]);
+export default function MarketFeed() {
+    const [data, setData] = useState(null);
+    const socketUrl = "wss://api-feed.dhan.co?version=2&token=YOUR_TOKEN&clientId=1100279974&authType=2";
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch("/api-scrip-master-one.xlsx"); // Fetch from public folder
-      const blob = await response.blob();
-      const reader = new FileReader();
+    useEffect(() => {
+        const socket = new WebSocket(socketUrl);
 
-      reader.onload = (e) => {
-        const arrayBuffer = e.target.result;
-        const wb = XLSX.read(arrayBuffer, { type: "array" });
-        const wsName = wb.SheetNames[0];
-        const ws = wb.Sheets[wsName];
-        const jsonData = XLSX.utils.sheet_to_json(ws);
-        setData(jsonData);
-      };
+        socket.onopen = () => {
+            console.log("WebSocket connected!");
 
-      reader.readAsArrayBuffer(blob);
-    };
+            const payload = {
+                "RequestCode": 15,
+                "InstrumentCount": 2,
+                "InstrumentList": [
+                    { "ExchangeSegment": "NSE_EQ", "SecurityId": "1333" },
+                    { "ExchangeSegment": "BSE_EQ", "SecurityId": "532540" }
+                ]
+            };
 
-    fetchData();
-  }, []);
+            socket.send(JSON.stringify(payload));
+        };
 
-  return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Excel Data</h2>
-      {data.length > 0 ? (
-        <table className="border-collapse border border-gray-300 w-full">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border p-2">SEM_EXM_EXCH_ID</th>
-              <th className="border p-2">SEM_SMST_SECURITY_ID</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((row, i) => (
-              <tr key={i} className="border">
-                <td className="border p-2">{row.SEM_EXM_EXCH_ID || "N/A"}</td>
-                <td className="border p-2">{row.SEM_SMST_SECURITY_ID || "N/A"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p>Loading...</p>
-      )}
-    </div>
-  );
-  
-  
+        socket.onmessage = async (event) => {
+            console.log("Raw data received:", event.data);
+
+            if (event.data instanceof Blob) {
+                try {
+                    const arrayBuffer = await event.data.arrayBuffer();
+                    const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: "string" });
+                    const jsonData = JSON.parse(decompressed);
+                    console.log("Parsed JSON:", jsonData);
+                    setData(jsonData);
+                } catch (error) {
+                    console.error("Error processing compressed data:", error);
+                }
+            } else {
+                try {
+                    const jsonData = JSON.parse(event.data);
+                    console.log("Parsed JSON:", jsonData);
+                    setData(jsonData);
+                } catch (error) {
+                    console.error("Error parsing JSON:", error);
+                }
+            }
+        };
+
+        socket.onerror = (error) => console.error("WebSocket error:", error);
+        socket.onclose = () => console.log("WebSocket disconnected.");
+
+        return () => socket.close();
+    }, []);
+
+    return (
+        <div>
+            <h2>Live Market Data</h2>
+            <pre>{JSON.stringify(data, null, 2)}</pre>
+        </div>
+    );
 }

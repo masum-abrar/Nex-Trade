@@ -10,7 +10,7 @@ const MarketPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch("/api-scrip-master.xlsx");
+      const response = await fetch("/api-scrip-master-one.xlsx");
       const blob = await response.blob();
       const reader = new FileReader();
 
@@ -33,7 +33,7 @@ const MarketPage = () => {
   const getFilteredData = () => {
     return data.filter((row) => {
       const exchangeId = row?.SEM_EXM_EXCH_ID?.trim()?.toUpperCase();
-      const instrumentType = row?.SEM_EXCH_INSTRUMENT_TYPE?.trim()?.toUpperCase();
+      const instrumentType = row?.SEM_INSTRUMENT_NAME?.trim()?.toUpperCase(); 
   
       switch (activeTab) {
         case "NSEFUT":
@@ -53,6 +53,7 @@ const MarketPage = () => {
       }
     });
   };
+  
   
   
 
@@ -95,32 +96,25 @@ const MarketPage = () => {
       </div>
       {/* Data Table */}
       <div className="p-4">
-        <table className="border-collapse border border-gray-300 w-full">
-          <thead>
-            <tr className="bg-gray-800 text-white">
-              <th className="border p-2">Exchange ID</th>
-              <th className="border p-2">Security ID</th>
-              <th className="border p-2">SEM EXCH INSTRUMENT TYPE</th>
-            </tr>
-          </thead>
-          <tbody>
-            {getFilteredData().length > 0 ? (
-              getFilteredData().map((row, i) => (
-                <tr key={i} className="border">
-                  <td className="border p-2">{row.SEM_EXM_EXCH_ID || "N/A"}</td>
-                  <td className="border p-2">{row.SEM_SMST_SECURITY_ID || "N/A"}</td>
-                  <td className="border p-2">{row.SEM_INSTRUMENT_NAME || "N/A"}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="3" className="text-center p-2 text-gray-400">
-                  No data available
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <table className="border-collapse border border-gray-300 w-full">
+  <thead>
+    <tr className="bg-gray-800 text-white">
+      <th className="border p-2">Exchange ID</th>
+      <th className="border p-2">Security ID</th>
+      <th className="border p-2">Symbol Name</th> {/* Only showing SM_SYMBOL_NAME */}
+    </tr>
+  </thead>
+  <tbody>
+    {getFilteredData().map((row, index) => (
+      <tr key={index} className="border">
+        <td className="border p-2">{row?.SEM_EXM_EXCH_ID || "N/A"}</td>
+        <td className="border p-2">{row?.SEM_SMST_SECURITY_ID || "N/A"}</td>
+        <td className="border p-2">{row?.SM_SYMBOL_NAME || "N/A"}</td> {/* Only showing SM_SYMBOL_NAME */}
+      </tr>
+    ))}
+  </tbody>
+</table>
+
       </div>
     </div>
   );
