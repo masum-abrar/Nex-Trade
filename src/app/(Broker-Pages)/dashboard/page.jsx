@@ -10,9 +10,9 @@ const HomePage = () => {
     const [toDate, setToDate] = useState("");
   
   return (
-    <div className="flex  ">
+    <div className="flex h-screen  ">
       <Sidebar />
-      <div className="flex-1">
+      <div className="flex-1 overflow-y-auto">
         <Navbar />
        
         <div className="flex flex-col">
