@@ -74,6 +74,8 @@ export default function MarketFeed() {
       dcv: "No Data",
       dhv: "No Data",
       dlv: "No Data",
+      bidPrice: "No Data",
+      askPrice: "No Data",
     };
 
     const dataView = new DataView(uint8Array.buffer);
@@ -138,6 +140,16 @@ export default function MarketFeed() {
       return response;
     }
     response.dlv = dataView.getFloat32(offset, true);
+    offset = offset + 28;
+    if (byteLength < 78) {
+      return response;
+    }
+    response.bidPrice = dataView.getFloat32(offset, true);
+    offset = offset + 4;
+    if (byteLength < 82) {
+      return response;
+    }
+    response.askPrice = dataView.getFloat32(offset, true);
 
     return response;
   }
