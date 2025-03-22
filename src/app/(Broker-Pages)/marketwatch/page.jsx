@@ -76,14 +76,12 @@ const MarketPage = () => {
 
         setLiveData(prev => ({
           ...prev,
-          [decodedData.securityId]: decodedData 
+          [decodedData.securityId]: decodedData
         }))
       })
-
+      console.log('LiveData:', liveData)
       setIsLoading(false)
     }
-
-    console.log('LiveData:', liveData)
 
     ws.onerror = error => {
       console.error('WebSocket Error:', error)
@@ -132,124 +130,110 @@ const MarketPage = () => {
     ws.send(JSON.stringify(subscribeMessage))
   }
 
-  function decodeBinaryData(uint8Array) {
-    const dataView = new DataView(uint8Array.buffer);
-    let offset = 0;
-
-    console.log('Raw binary data:', uint8Array);
-    console.log('Received data length:', uint8Array.length);
-    const idArray = Object.keys(subscriptions).map(Number);
-    console.log(idArray);
-
-    let securityId = idArray,
-        ltp = 0,
-        ltq = 0,
-        ltt = 0,
-        averagePrice = 0,
-        volume = 0,
-        totalSellQuantity = 0,
-        totalBuyQuantity = 0,
-        dayOpenValue = 0,
-        dayCloseValue = 0,
-        dayHighValue = 0,
-        dayLowValue = 0;
-
-    try {
-        const checkDataLength = size => {
-            if (offset + size > uint8Array.length) {
-                console.warn(
-                    `Not enough data: expected ${size} bytes, but only ${
-                        uint8Array.length - offset
-                    } bytes available at offset ${offset}`
-                );
-                return false;
-            }
-            return true;
-        };
-
-        // Read methods (increment offset after reading)
-        const readInt32 = () => {
-            if (!checkDataLength(4)) return 0;
-            let value = dataView.getInt32(offset, true);
-            offset += 4;
-            return value;
-        };
-
-        const readFloat64 = () => {
-            if (!checkDataLength(8)) return 0;
-            let value = dataView.getFloat64(offset, true);
-            offset += 8;
-            return value;
-        };
-
-        const readFloat32 = () => {
-            if (!checkDataLength(4)) return 0;
-            let value = dataView.getFloat32(offset, true);
-            offset += 4;
-            return value;
-        };
-
-        const readInt16 = () => {
-            if (!checkDataLength(2)) return 0;
-            let value = dataView.getInt16(offset, true);
-            offset += 2;
-            return value;
-        };
-
-        // Read values correctly
-        ltp = readFloat64();
-        console.log('LTP:', ltp);
-
-        ltq = readInt16();
-        console.log('LTQ:', ltq);
-
-        ltt = readInt32();
-        console.log('LTT:', ltt);
-
-        averagePrice = readFloat64();
-        console.log('Average Price:', averagePrice);
-
-        volume = readInt32();
-        console.log('Volume:', volume);
-
-        totalSellQuantity = readInt32();
-        console.log('Total Sell Quantity:', totalSellQuantity);
-
-        totalBuyQuantity = readInt32();
-        console.log('Total Buy Quantity:', totalBuyQuantity);
-
-        dayOpenValue = readFloat32();
-        console.log('Day Open Value:', dayOpenValue);
-
-        dayCloseValue = readFloat32();
-        console.log('Day Close Value:', dayCloseValue);
-
-        dayHighValue = readFloat32();
-        console.log('Day High Value:', dayHighValue);
-
-        dayLowValue = readFloat32();
-        console.log('Day Low Value:', dayLowValue);
-
-        return {
-            securityId,
-            ltp,
-            ltq,
-            ltt,
-            averagePrice,
-            volume,
-            totalSellQuantity,
-            totalBuyQuantity,
-            dayOpenValue,
-            dayCloseValue,
-            dayHighValue,
-            dayLowValue
-        };
-    } catch (error) {
-        console.error('Error decoding binary data:', error);
-        return { error: 'Decoding error' };
+  function decodeBinaryData (uint8Array) {
+    if (!uint8Array || uint8Array.byteLength < 4) {
+      console.error('Invalid binary data received.')
+      return null
     }
-}
 
+    // Implement binary decoding here based on Dhan API documentation.
+    // Example (replace with actual logic):
+    const byteLength = uint8Array?.byteLength //16
+    const idArray = Object.keys(subscriptions).map(Number)
+    console.log(idArray)
+
+    let response = {
+      securityId: idArray,
+      ltp: 'No Data',
+      ltq: 'No Data',
+      ltt: 'No Data',
+      atp: 'No Data',
+      volume: 'No Data',
+      tsq: 'No Data',
+      tbq: 'No Data',
+      dov: 'No Data',
+      dcv: 'No Data',
+      dhv: 'No Data',
+      dlv: 'No Data',
+      bidPrice: 'No Data',
+      askPrice: 'No Data'
+    }
+
+    const dataView = new DataView(uint8Array.buffer)
+    if (byteLength < 8) {
+      return response
+    }
+
+    let offset = 8
+    offset = offset + 4
+    //Example code that will need to be changed to match the Dhan API.
+    // const value = dataView.getUint32(0, true);
+    // const securityId = dataView.getInt32(offset, true);
+    // offset += 4;
+    response.ltp = dataView.getFloat32(offset, true)
+    offset = offset + 2
+    if (byteLength < 14) {
+      return response
+    }
+    response.ltq = dataView.getInt16(offset, true)
+    offset = offset + 4
+    if (byteLength < 18) {
+      return response
+    }
+    response.ltt = dataView.getInt32(offset, true)
+    offset = offset + 4
+    if (byteLength < 22) {
+      return response
+    }
+    response.atp = dataView.getFloat32(offset, true)
+    offset = offset + 4
+    if (byteLength < 26) {
+      return response
+    }
+    response.volume = dataView.getInt32(offset, true)
+    offset = offset + 4
+    if (byteLength < 30) {
+      return response
+    }
+    response.tsq = dataView.getInt32(offset, true)
+    offset = offset + 4
+    if (byteLength < 34) {
+      return response
+    }
+    response.tbq = dataView.getInt32(offset, true)
+    offset = offset + 4
+    if (byteLength < 38) {
+      return response
+    }
+    response.dov = dataView.getFloat32(offset, true)
+    offset = offset + 4
+    if (byteLength < 42) {
+      return response
+    }
+    response.dcv = dataView.getFloat32(offset, true)
+    offset = offset + 4
+    if (byteLength < 46) {
+      return response
+    }
+    response.dhv = dataView.getFloat32(offset, true)
+    offset = offset + 4
+    if (byteLength < 50) {
+      return response
+    }
+    response.dlv = dataView.getFloat32(offset, true)
+    offset = offset + 28
+    if (byteLength < 78) {
+      return response
+    }
+    response.bidPrice = dataView.getFloat32(offset, true)
+    offset = offset + 4
+    if (byteLength < 82) {
+      return response
+    }
+    response.askPrice = dataView.getFloat32(offset, true)
+
+    return response
+  }
 
   useEffect(() => {
     if (searchTerm.trim() === '') {
@@ -377,48 +361,51 @@ const MarketPage = () => {
         {isLoading ? (
           <p>Loading live data...</p>
         ) : (
-          <table className='border border-gray-300 w-full border-collapse'>
+          <table className='border border-gray-800 w-full border-collapse'>
             <thead>
               <tr className='bg-gray-800 text-white'>
-                <th className='p-2 border'>LTP</th>
-                <th className='p-2 border'>LTQ</th>
-                <th className='p-2 border'>LTT</th>
-                <th className='p-2 border'>Avg Price</th>
-                <th className='p-2 border'>Total Sell Qty</th>
-                <th className='p-2 border'>Total Buy Qty</th>
-                <th className='p-2 border'>Open</th>
-                <th className='p-2 border'>Close</th>
-                <th className='p-2 border'>High</th>
-                <th className='p-2 border'>Low</th>
+                <th className='p-2 px-8 text-left'>Script</th>
+                <th className='p-2'>Bid</th>
+                <th className='p-2'>Ask</th>
+                <th className='p-2'>Ltp</th>
+                <th className='p-2'>LTQ</th>
+                <th className='p-2'>LTT</th>
+                <th className='p-2'>Avg Price</th>
+                <th className='p-2'>Sell</th>
+                <th className='p-2'>Buy</th>
+                <th className='p-2'>Open</th>
+                <th className='p-2'>Close</th>
+                <th className='p-2'>High</th>
+                <th className='p-2'>Low</th>
               </tr>
             </thead>
             <tbody>
               {Object.values(liveData).map(dataPoint => (
-                <tr key={dataPoint.securityId} className='border text-center'>
-                  <td className='p-2 border'>{dataPoint.ltp || 'N/A'}</td>
-                  <td className='p-2 border'>{dataPoint.ltq || 'N/A'}</td>
-                  <td className='p-2 border'>{dataPoint.ltt || 'N/A'}</td>
-                  <td className='p-2 border'>
-                    {dataPoint.averagePrice || 'N/A'}
+                <tr
+                  key={dataPoint.securityId}
+                  className='border-[#071824] border-3 border-b-gray-800 text-center'
+                >
+                  <td className='p-2 px-8 text-left'>script</td>
+                  <td className='p-2'>
+                    <span className='text-green-500'>
+                      {dataPoint.bidPrice || 'N/A'}
+                    </span>
                   </td>
-                  <td className='p-2 border'>
-                    {dataPoint.totalSellQuantity || 'N/A'}
+                  <td className='p-2'>
+                    <span className='text-green-500'>
+                      {dataPoint.bidPrice || 'N/A'}
+                    </span>
                   </td>
-                  <td className='p-2 border'>
-                    {dataPoint.totalBuyQuantity || 'N/A'}
-                  </td>
-                  <td className='p-2 border'>
-                    {dataPoint.dayOpenValue || 'N/A'}
-                  </td>
-                  <td className='p-2 border'>
-                    {dataPoint.dayCloseValue || 'N/A'}
-                  </td>
-                  <td className='p-2 border'>
-                    {dataPoint.dayHighValue || 'N/A'}
-                  </td>
-                  <td className='p-2 border'>
-                    {dataPoint.dayLowValue || 'N/A'}
-                  </td>
+                  <td className='p-2'>{dataPoint.ltp || 'N/A'}</td>
+                  <td className='p-2'>{dataPoint.ltq || 'N/A'}</td>
+                  <td className='p-2'>{dataPoint.ltt || 'N/A'}</td>
+                  <td className='p-2'>{dataPoint.atp || 'N/A'}</td>
+                  <td className='p-2'>{dataPoint.tsq || 'N/A'}</td>
+                  <td className='p-2'>{dataPoint.tbq || 'N/A'}</td>
+                  <td className='p-2'>{dataPoint.dov || 'N/A'}</td>
+                  <td className='p-2'>{dataPoint.dcv || 'N/A'}</td>
+                  <td className='p-2'>{dataPoint.dhv || 'N/A'}</td>
+                  <td className='p-2'>{dataPoint.dlv || 'N/A'}</td>
                 </tr>
               ))}
             </tbody>
