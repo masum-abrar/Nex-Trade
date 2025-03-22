@@ -12,6 +12,19 @@ const MarketPage = () => {
   const [liveData, setLiveData] = useState({})
   const [isLoading, setIsLoading] = useState(true)
 
+  // Load saved subscriptions from localStorage on mount
+  useEffect(() => {
+    const savedSubscriptions = localStorage.getItem('subscriptions')
+    if (savedSubscriptions) {
+      setSubscriptions(JSON.parse(savedSubscriptions))
+    }
+  }, [])
+
+  // Save subscriptions to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('subscriptions', JSON.stringify(subscriptions))
+  }, [subscriptions])
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -52,7 +65,18 @@ const MarketPage = () => {
             securityId,
             subscriptions[securityId].exchangeSegment
           )
-          subscribe(securityId, ws)
+          if (
+            info.some(
+              item => item.SEM_SMST_SECURITY_ID === parseInt(securityId)
+            )
+          ) {
+            subscribe(securityId, ws)
+          } else {
+            console.error(
+              'Skipping subscription, instrument not found:',
+              securityId
+            )
+          }
         }
       })
     }
@@ -97,7 +121,7 @@ const MarketPage = () => {
       ws.close()
       setIsLoading(false)
     }
-  }, [subscriptions])
+  }, [subscriptions, info])
 
   const subscribe = (securityId, ws) => {
     const instrument = info.find(
@@ -276,10 +300,11 @@ const MarketPage = () => {
     console.log('Mapped Exchange Segment:', mappedSegment)
 
     const isChecked = !subscriptions[securityId]?.isChecked
-    setSubscriptions({
+    const updatedSubscriptions = {
       ...subscriptions,
       [securityId]: { isChecked, exchangeSegment: mappedSegment }
-    })
+    }
+    setSubscriptions(updatedSubscriptions)
 
     if (isChecked) {
       console.log('Attempting to subscribe with:', {
@@ -368,46 +393,63 @@ const MarketPage = () => {
                 <th className='p-2'>Bid</th>
                 <th className='p-2'>Ask</th>
                 <th className='p-2'>Ltp</th>
-                <th className='p-2'>LTQ</th>
-                <th className='p-2'>LTT</th>
-                <th className='p-2'>Avg Price</th>
+                <th className='p-2'>Ch</th>
+                <th className='p-2'>Chp</th>
+                {/* <th className='p-2'>Avg Price</th>
+                <th className='p-2'>Volumn</th>
                 <th className='p-2'>Sell</th>
-                <th className='p-2'>Buy</th>
+                <th className='p-2'>Buy</th> */}
                 <th className='p-2'>Open</th>
                 <th className='p-2'>Close</th>
                 <th className='p-2'>High</th>
                 <th className='p-2'>Low</th>
+                <th className='p-2'>Time</th>
               </tr>
             </thead>
             <tbody>
-              {Object.values(liveData).map(dataPoint => (
-                <tr
-                  key={dataPoint.securityId}
-                  className='border-[#071824] border-3 border-b-gray-800 text-center'
-                >
-                  <td className='p-2 px-8 text-left'>script</td>
-                  <td className='p-2'>
-                    <span className='text-green-500'>
-                      {dataPoint.bidPrice || 'N/A'}
-                    </span>
-                  </td>
-                  <td className='p-2'>
-                    <span className='text-green-500'>
-                      {dataPoint.bidPrice || 'N/A'}
-                    </span>
-                  </td>
-                  <td className='p-2'>{dataPoint.ltp || 'N/A'}</td>
-                  <td className='p-2'>{dataPoint.ltq || 'N/A'}</td>
-                  <td className='p-2'>{dataPoint.ltt || 'N/A'}</td>
-                  <td className='p-2'>{dataPoint.atp || 'N/A'}</td>
-                  <td className='p-2'>{dataPoint.tsq || 'N/A'}</td>
-                  <td className='p-2'>{dataPoint.tbq || 'N/A'}</td>
-                  <td className='p-2'>{dataPoint.dov || 'N/A'}</td>
-                  <td className='p-2'>{dataPoint.dcv || 'N/A'}</td>
-                  <td className='p-2'>{dataPoint.dhv || 'N/A'}</td>
-                  <td className='p-2'>{dataPoint.dlv || 'N/A'}</td>
-                </tr>
-              ))}
+              {Object.values(liveData).map(dataPoint => {
+                const scriptName =
+                  info.find(
+                    item =>
+                      item.SEM_SMST_SECURITY_ID ===
+                      parseInt(dataPoint.securityId)
+                  )?.SEM_TRADING_SYMBOL || 'Unknown'
+                const timeValue = dataPoint.timestamp
+                  ? new Date(dataPoint.timestamp).toLocaleTimeString()
+                  : 'N/A'
+                return (
+                  <tr
+                    key={dataPoint.securityId}
+                    className='border-[#071824] border-3 border-b-gray-800 text-center'
+                  >
+                    <td className='p-2 px-8 text-left'>
+                      {scriptName || 'N/A'}
+                    </td>
+                    <td className='p-2'>
+                      <span className='text-green-500'>
+                        {dataPoint.bidPrice || 'N/A'}
+                      </span>
+                    </td>
+                    <td className='p-2'>
+                      <span className='text-green-500'>
+                        {dataPoint.bidPrice || 'N/A'}
+                      </span>
+                    </td>
+                    <td className='p-2'>{dataPoint.ltp || 'N/A'}</td>
+                    <td className='p-2'>{dataPoint.ltq || 'N/A'}</td>
+                    <td className='p-2'>{dataPoint.ltt || 'N/A'}</td>
+                    {/* <td className='p-2'>{dataPoint.atp || 'N/A'}</td>
+                    <td className='p-2'>{dataPoint.volumn || 'N/A'}</td>
+                    <td className='p-2'>{dataPoint.tsq || 'N/A'}</td>
+                    <td className='p-2'>{dataPoint.tbq || 'N/A'}</td> */}
+                    <td className='p-2'>{dataPoint.dov || 'N/A'}</td>
+                    <td className='p-2'>{dataPoint.dcv || 'N/A'}</td>
+                    <td className='p-2'>{dataPoint.dhv || 'N/A'}</td>
+                    <td className='p-2'>{dataPoint.dlv || 'N/A'}</td>
+                    <td className='p-2'>{timeValue || 'N/A'}</td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         )}
