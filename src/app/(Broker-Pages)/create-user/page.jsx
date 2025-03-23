@@ -31,6 +31,24 @@ const ToggleSwitch = ({ label }) => {
 const Page = () => {
   const [formData, setFormData] = useState({})
   const [showFields, setShowFields] = useState(false);
+  const [showMCXOPTBUY, setShowMCXOPTBUY] = useState(false);
+  const [showMcxOptSell, setShowMcxOptSell] = useState(false);
+  const [showMCXOPT, setShowMCXOPT] = useState(false);
+  const [showNSE, setShowNSE] = useState(false);
+  const [showIDXNSE, setShowIDXNSE] = useState(false);
+  // NEW
+  const [showIDXOPTBUY, setShowIDXOPTBUY] = useState(false);
+  const [showIDXOPTSELL, setShowIDXOPTSELL] = useState(false);
+  const [showIDXOPT, setShowIDXOPT] = useState(false);
+  const [showSTKOPTBUY, setShowSTKOPTBUY] = useState(false);
+
+  //new
+  const [showSTKOPTSELL, setShowSTKOPTSELL] = useState(true); // Default show STKOPTSELL
+  const [showSTKOPT, setShowSTKOPT] = useState(false);
+  const [showSTKNSE, setShowSTKNSE] = useState(false);
+  const [showSTKEQ, setShowSTKEQ] = useState(false);
+  const [showBSEOPTBUY, setShowBSEOPTBUY] = useState(false);
+
   const toggleFields = () => {
     setShowFields(!showFields);
   };
@@ -49,14 +67,63 @@ const Page = () => {
         "mcx_maxLots",
         "mcx_orderLots",
         "mcx_limitPercentage",
-        "mcx_intraday"
+        "mcx_intraday",
+        "mcxOPTBUY_commission",
+        "mcxOPTBUY_strike",
+        "mcxOPTSELL_commission",  // Added for MCX Option Selling
+        "mcxOPTSELL_strike",      // Added for MCX Option Selling
+  
+        // New fields added for MCX Options
+        "mcxOPT_maxLots",          // Max Lots
+        "mcxOPT_orderLots",        // Order Lots
+        "mcxOPT_limitPercentage",  // Limit Percentage
+        "mcxOPT_intraday",         // Intraday
+        "mcxOPT_holding",          // Holding
+  
+        // New fields added for NSE and IDXNSE
+        "nse_maxExchLots",         // NSE Max Exch Lots
+  
+        "idxNSE_commission",       // IDXNSE Commission
+        "idxNSE_maxLots",          // IDXNSE Max Lots
+        "idxNSE_orderLots",        // IDXNSE Order Lots
+        "idxNSE_limitPercentage",  // IDXNSE Limit Percentage
+        "idxNSE_intraday",         // IDXNSE Intraday
+        "idxNSE_holding",          // IDXNSE Holding
+  
+        // New fields for IDXOPTBUY
+        "idxOPTBUY_commission",    // IDXOPTBUY Commission
+        "idxOPTBUY_strike",        // IDXOPTBUY Strike
+       
+        // New fields for IDXOPTSELL
+        "idxOPTSELL_commission",   // IDXOPTSELL Commission
+        "idxOPTSELL_strike",       // IDXOPTSELL Strike
+      
+  
+        // New fields for IDXOPT
+        "idxOPT_maxLots",          // IDXOPT Max Lots
+        "idxOPT_orderLots",        // IDXOPT Order Lots
+        "idxOPT_expiryLossHold",   // IDXOPT Expiry Loss Hold
+        "idxOPT_expiryProfitHold", // IDXOPT Expiry Profit Hold
+        "idxOPT_expiryIntradayMargin", // IDXOPT Expiry Intraday Margin
+        "idxOPT_limitPercentage",  // IDXOPT Limit Percentage
+        "idxOPT_intraday",         // IDXOPT Intraday
+        "idxOPT_holding",          // IDXOPT Holding
+       
+  
+        // New fields for STKOPTBUY
+        "stkOPTBUY_commission",    // STKOPTBUY Commission
+        "stkOPTBUY_strike",        // STKOPTBUY Strike
       ].includes(name)
-        ? value ? parseInt(value, 10) : null  // ✅ Convert to integer or set null
-        : name === "intradaySquare"
-        ? value === "true" ? true : value === "false" ? false : null  // ✅ Handle boolean or null
-        : value || null, // ✅ Set null if empty
+        ? value ? parseInt(value, 10) : null // Convert to integer or set null
+        : ["intradaySquare"].includes(name)
+        ? value === "true" ? true : value === "false" ? false : null // Handle boolean or null
+        : value || null, // Set null if empty
     }));
   };
+  
+  
+  
+  
   
   
   
@@ -376,6 +443,669 @@ const Page = () => {
     
       )}
     </div>
+   
+
+    {/* MCXOPTBUY */}
+    <div className="mt-6">
+        <div
+          onClick={() => setShowMCXOPTBUY(!showMCXOPTBUY)}
+          className="cursor-pointer bg-gray-600 hover:bg-blue-700 w-[60%] text-white font-semibold py-2 px-4 rounded-md text-center transition duration-300"
+        >
+          {showMCXOPTBUY ? 'Hide MCX Option Buying' : 'Show MCX Option Buying'}
+        </div>
+
+        {showMCXOPTBUY && (
+          <div className="mt-4 bg-gray-900 p-6 rounded-lg shadow-md">
+            {/* MCXOPTBUY Commission Type */}
+            <div className="mb-4">
+              <label className="block font-medium text-gray-300 text-sm">
+                MCX Option Buying Commission Type:
+              </label>
+              <select
+                name="mcxOPTBUY_commissionType"
+                value={formData.mcxOPTBUY_commissionType}
+                onChange={handleChange}
+                className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+              >
+                <option value="perCrore">Per Crore</option>
+                <option value="perLot">Per Lot</option>
+              </select>
+            </div>
+
+            {/* MCXOPTBUY Commission */}
+            <div className="mb-4">
+              <label className="block font-medium text-gray-300 text-sm">
+                MCX Option Buying Commission:
+              </label>
+              <input
+                type="number"
+                name="mcxOPTBUY_commission"
+                value={formData.mcxOPTBUY_commission}
+                onChange={handleChange}
+                className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+              />
+            </div>
+
+            {/* MCXOPTBUY Strike */}
+            <div className="mb-4">
+              <label className="block font-medium text-gray-300 text-sm">
+                MCX Option Buying Strike:
+              </label>
+              <input
+                type="number"
+                name="mcxOPTBUY_strike"
+                value={formData.mcxOPTBUY_strike}
+                onChange={handleChange}
+                className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+              />
+            </div>
+
+            {/* MCXOPTBUY Allow */}
+            <div className="mb-4">
+              <label className="block font-medium text-gray-300 text-sm">
+                MCX Option Buying Allow:
+              </label>
+              <select
+                name="mcxOPTBUY_allow"
+                value={formData.mcxOPTBUY_allow}
+                onChange={handleChange}
+                className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+              >
+                <option value="Allowed">Allowed</option>
+                <option value="Not Allowed">Not Allowed</option>
+              </select>
+            </div>
+          </div>
+        )}
+      </div>
+
+
+      {/* MCXOPTSELL */}
+
+      {/* Toggle MCX Option Selling */}
+<div
+  onClick={() => setShowMcxOptSell(!showMcxOptSell)}
+  className="cursor-pointer bg-gray-600 hover:bg-blue-700 w-[60%] text-white font-semibold py-2 px-4 rounded-md text-center transition duration-300 mt-4"
+>
+  {showMcxOptSell ? "Hide MCX Option Selling" : "Show MCX Option Selling"}
+</div>
+
+{showMcxOptSell && (
+  <div className="mt-4 bg-gray-900 p-6 rounded-lg shadow-md">
+    {/* MCX Option Selling Commission Type */}
+    <div className="mb-4">
+      <label className="block font-medium text-gray-300 text-sm">
+        MCX Option Selling Commission Type:
+      </label>
+      <select
+        name="mcxOPTSELL_commissionType"
+        value={formData.mcxOPTSELL_commissionType}
+        onChange={handleChange}
+        className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+      >
+        <option value="perCrore">Per Crore</option>
+        <option value="perLot">Per Lot</option>
+      </select>
+    </div>
+
+    {/* MCX Option Selling Commission */}
+    <div className="mb-4">
+      <label className="block font-medium text-gray-300 text-sm">
+        MCX Option Selling Commission:
+      </label>
+      <input
+        type="number"
+        name="mcxOPTSELL_commission"
+        value={formData.mcxOPTSELL_commission}
+        onChange={handleChange}
+        className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+      />
+    </div>
+
+    {/* MCX Option Selling Strike */}
+    <div className="mb-4">
+      <label className="block font-medium text-gray-300 text-sm">
+        MCX Option Selling Strike:
+      </label>
+      <input
+        type="number"
+        name="mcxOPTSELL_strike"
+        value={formData.mcxOPTSELL_strike}
+        onChange={handleChange}
+        className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+      />
+    </div>
+
+    {/* MCX Option Selling Allow */}
+    <div className="mb-4">
+  <label className="block font-medium text-gray-300 text-sm">
+    MCX Option Selling Allow:
+  </label>
+  <select
+    name="mcxOPTSELL_allow"
+    value={formData.mcxOPTSELL_allow}
+    onChange={handleChange}
+    className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+  >
+    <option value="Allow">Allow</option>
+    <option value="Not Allow">Not Allow</option>
+  </select>
+</div>
+
+  </div>
+)}
+
+
+{/* MCXOPT */}
+
+<div>
+  <div
+    onClick={() => setShowMCXOPT(!showMCXOPT)}
+    className="cursor-pointer bg-gray-600 hover:bg-blue-700 w-[50%] text-white font-semibold py-2 px-4 rounded-md text-center transition duration-300"
+  >
+    {showMCXOPT ? 'Hide MCXOPT' : 'Show MCXOPT'}
+  </div>
+
+  {showMCXOPT && (
+    <div className="mt-4 bg-gray-900 p-6 rounded-lg shadow-md">
+      {/* MCXOPT Max Lots */}
+      <div className="mb-4">
+        <label className="block font-medium text-gray-300 text-sm">MCXOPT Max Lots:</label>
+        <input
+          type="number"
+          name="mcxOPT_maxLots"
+          value={formData.mcxOPT_maxLots}
+          onChange={handleChange}
+          className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+        />
+      </div>
+
+      {/* MCXOPT Order Lots */}
+      <div className="mb-4">
+        <label className="block font-medium text-gray-300 text-sm">MCXOPT Order Lots:</label>
+        <input
+          type="number"
+          name="mcxOPT_orderLots"
+          value={formData.mcxOPT_orderLots}
+          onChange={handleChange}
+          className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+        />
+      </div>
+
+      {/* MCXOPT Limit Percentage */}
+      <div className="mb-4">
+        <label className="block font-medium text-gray-300 text-sm">MCXOPT Limit Percentage:</label>
+        <input
+          type="number"
+          name="mcxOPT_limitPercentage"
+          value={formData.mcxOPT_limitPercentage}
+          onChange={handleChange}
+          className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+        />
+      </div>
+
+      {/* MCXOPT Intraday */}
+      <div className="mb-4">
+        <label className="block font-medium text-gray-300 text-sm">MCXOPT Intraday:</label>
+        <input
+          type="number"
+          name="mcxOPT_intraday"
+          value={formData.mcxOPT_intraday}
+          onChange={handleChange}
+          className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+        />
+      </div>
+
+      {/* MCXOPT Holding */}
+      <div className="mb-4">
+        <label className="block font-medium text-gray-300 text-sm">MCXOPT Holding:</label>
+        <input
+          type="number"
+          name="mcxOPT_holding"
+          value={formData.mcxOPT_holding}
+          onChange={handleChange}
+          className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+        />
+      </div>
+
+      {/* MCXOPT Selling Overnight */}
+      <div className="mb-4">
+        <label className="block font-medium text-gray-300 text-sm">MCXOPT Selling Overnight:</label>
+        <select
+          name="mcxOPT_sellingOvernight"
+          value={formData.mcxOPT_sellingOvernight}
+          onChange={handleChange}
+          className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+        >
+          <option value="allowed">Allowed</option>
+          <option value="notAllowed">Not Allowed</option>
+        </select>
+      </div>
+    </div>
+  )}
+</div>
+
+{/* NSE and IDX */}
+<div>
+      {/* Toggle NSE */}
+      <div
+        onClick={() => setShowNSE(!showNSE)}
+        className="cursor-pointer bg-gray-600 hover:bg-blue-700 w-[50%] text-white font-semibold py-2 px-4 rounded-md text-center transition duration-300"
+      >
+        {showNSE ? 'Hide NSE' : 'Show NSE'}
+      </div>
+
+      {/* NSE Fields */}
+      {showNSE && (
+        <div className="mt-4 bg-gray-900 p-6 rounded-lg shadow-md">
+          {/* NSE Max Exch Lots */}
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">NSE Max Exch Lots:</label>
+            <input
+              type="number"
+              name="nse_maxExchLots"
+              value={formData.nse_maxExchLots}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Toggle IDXNSE */}
+      <div
+        onClick={() => setShowIDXNSE(!showIDXNSE)}
+        className="cursor-pointer mt-3 bg-gray-600 hover:bg-blue-700 w-[50%] text-white font-semibold py-2 px-4 rounded-md text-center transition duration-300"
+      >
+        {showIDXNSE ? 'Hide IDXNSE' : 'Show IDXNSE'}
+      </div>
+
+      {/* IDXNSE Fields */}
+      {showIDXNSE && (
+        <div className="mt-4 bg-gray-900 p-6 rounded-lg shadow-md">
+          {/* IDXNSE Commission Type */}
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index CommissionType:</label>
+            <select
+              name="idxNSE_commissionType"
+              value={formData.idxNSE_commissionType}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            >
+              <option value="perCrore">perCrore</option>
+              <option value="perLot">perLot</option>
+            </select>
+          </div>
+
+          {/* IDXNSE Commission */}
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">IDXNSE_commission:</label>
+            <input
+              type="number"
+              name="idxNSE_commission"
+              value={formData.idxNSE_commission}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+
+          {/* IDXNSE Max Lots */}
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Max Lots:</label>
+            <input
+              type="number"
+              name="idxNSE_maxLots"
+              value={formData.idxNSE_maxLots}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+
+          {/* IDXNSE Order Lots */}
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Order Lots:</label>
+            <input
+              type="number"
+              name="idxNSE_orderLots"
+              value={formData.idxNSE_orderLots}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+
+          {/* IDXNSE Limit Percentage */}
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Limit Percentage:</label>
+            <input
+              type="number"
+              name="idxNSE_limitPercentage"
+              value={formData.idxNSE_limitPercentage}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+
+          {/* IDXNSE Intraday */}
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Intraday:</label>
+            <input
+              type="number"
+              name="idxNSE_intraday"
+              value={formData.idxNSE_intraday}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+
+          {/* IDXNSE Holding */}
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Holding:</label>
+            <input
+              type="number"
+              name="idxNSE_holding"
+              value={formData.idxNSE_holding}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+
+{/* {FOur BUTTON} */}
+<div>
+      {/* Toggle IDXOPTBUY */}
+      <div
+        onClick={() => setShowIDXOPTBUY(!showIDXOPTBUY)}
+        className="cursor-pointer bg-gray-600 hover:bg-blue-700 w-[50%] text-white font-semibold py-2 px-4 rounded-md text-center transition duration-300"
+      >
+        {showIDXOPTBUY ? 'Hide IDXOPTBUY' : 'Show IDXOPTBUY'}
+      </div>
+
+      {/* IDXOPTBUY Fields */}
+      {showIDXOPTBUY && (
+        <div className="mt-4 bg-gray-900 p-6 rounded-lg shadow-md">
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Option Buying CommissionType:</label>
+            <select
+              name="idxOPTBUY_commissionType"
+              value={formData.idxOPTBUY_commissionType}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            >
+              <option value="perCrore">perCrore</option>
+              <option value="perLot">perLot</option>
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">IDXOPTBUY_commission:</label>
+            <input
+              type="number"
+              name="idxOPTBUY_commission"
+              value={formData.idxOPTBUY_commission}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">IDXOPTBUY_strike:</label>
+            <input
+              type="number"
+              name="idxOPTBUY_strike"
+              value={formData.idxOPTBUY_strike}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">IDXOPTBUY_allow:</label>
+            <select
+              name="idxOPTBUY_allow"
+              value={formData.idxOPTBUY_allow}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            >
+              <option value="Not Allowed">Not Allowed</option>
+              <option value="Allowed">Allowed</option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* Toggle IDXOPTSELL */}
+      <div
+        onClick={() => setShowIDXOPTSELL(!showIDXOPTSELL)}
+        className="cursor-pointer mt-3 bg-gray-600 hover:bg-blue-700 w-[50%] text-white font-semibold py-2 px-4 rounded-md text-center transition duration-300"
+      >
+        {showIDXOPTSELL ? 'Hide IDXOPTSELL' : 'Show IDXOPTSELL'}
+      </div>
+
+      {/* IDXOPTSELL Fields */}
+      {showIDXOPTSELL && (
+        <div className="mt-4 bg-gray-900 p-6 rounded-lg shadow-md">
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Option Selling CommissionType:</label>
+            <select
+              name="idxOPTSELL_commissionType"
+              value={formData.idxOPTSELL_commissionType}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            >
+              <option value="perCrore">perCrore</option>
+              <option value="perLot">perLot</option>
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">IDXOPTSELL_commission:</label>
+            <input
+              type="number"
+              name="idxOPTSELL_commission"
+              value={formData.idxOPTSELL_commission}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">IDXOPTSELL_strike:</label>
+            <input
+              type="number"
+              name="idxOPTSELL_strike"
+              value={formData.idxOPTSELL_strike}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">IDXOPTSELL_allow:</label>
+            <select
+              name="idxOPTSELL_allow"
+              value={formData.idxOPTSELL_allow}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            >
+              <option value="Not Allowed">Not Allowed</option>
+              <option value="Allowed">Allowed</option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* Toggle IDXOPT */}
+      <div
+        onClick={() => setShowIDXOPT(!showIDXOPT)}
+        className="cursor-pointer mt-3 bg-gray-600 hover:bg-blue-700 w-[50%] text-white font-semibold py-2 px-4 rounded-md text-center transition duration-300"
+      >
+        {showIDXOPT ? 'Hide IDXOPT' : 'Show IDXOPT'}
+      </div>
+
+      {/* IDXOPT Fields */}
+      {showIDXOPT && (
+        <div className="mt-4 bg-gray-900 p-6 rounded-lg shadow-md">
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Option Max Lots:</label>
+            <input
+              type="number"
+              name="idxOPT_maxLots"
+              value={formData.idxOPT_maxLots}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Option Order Lots:</label>
+            <input
+              type="number"
+              name="idxOPT_orderLots"
+              value={formData.idxOPT_orderLots}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Option Expiry Loss Hold:</label>
+            <input
+              type="number"
+              name="idxOPT_expiryLossHold"
+              value={formData.idxOPT_expiryLossHold}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Option Expiry Profit Hold:</label>
+            <input
+              type="number"
+              name="idxOPT_expiryProfitHold"
+              value={formData.idxOPT_expiryProfitHold}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Option Expiry Intraday Margin:</label>
+            <input
+              type="number"
+              name="idxOPT_expiryIntradayMargin"
+              value={formData.idxOPT_expiryIntradayMargin}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Option Limit Percentage:</label>
+            <input
+              type="number"
+              name="idxOPT_limitPercentage"
+              value={formData.idxOPT_limitPercentage}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Option Intraday:</label>
+            <input
+              type="number"
+              name="idxOPT_intraday"
+              value={formData.idxOPT_intraday}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Option Holding:</label>
+            <input
+              type="number"
+              name="idxOPT_holding"
+              value={formData.idxOPT_holding}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Index Option Selling Overnight:</label>
+            <select
+              name="idxOPT_sellingOvernight"
+              value={formData.idxOPT_sellingOvernight}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            >
+              <option value="Not Allowed">Not Allowed</option>
+              <option value="Allowed">Allowed</option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* Toggle STKOPTBUY */}
+      <div
+        onClick={() => setShowSTKOPTBUY(!showSTKOPTBUY)}
+        className="cursor-pointer mt-3 bg-gray-600 hover:bg-blue-700 w-[50%] text-white font-semibold py-2 px-4 rounded-md text-center transition duration-300"
+      >
+        {showSTKOPTBUY ? 'Hide STKOPTBUY' : 'Show STKOPTBUY'}
+      </div>
+
+      {/* STKOPTBUY Fields */}
+      {showSTKOPTBUY && (
+        <div className="mt-4 bg-gray-900 p-6 rounded-lg shadow-md">
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">Stock Option Buying CommissionType:</label>
+            <select
+              name="stkOPTBUY_commissionType"
+              value={formData.stkOPTBUY_commissionType}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            >
+              <option value="perCrore">perCrore</option>
+              <option value="perLot">perLot</option>
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">STKOPTBUY_commission:</label>
+            <input
+              type="number"
+              name="stkOPTBUY_commission"
+              value={formData.stkOPTBUY_commission}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">STKOPTBUY_strike:</label>
+            <input
+              type="number"
+              name="stkOPTBUY_strike"
+              value={formData.stkOPTBUY_strike}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium text-gray-300 text-sm">STKOPTBUY_allow:</label>
+            <select
+              name="stkOPTBUY_allow"
+              value={formData.stkOPTBUY_allow}
+              onChange={handleChange}
+              className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+            >
+              <option value="Not Allowed">Not Allowed</option>
+              <option value="Allowed">Allowed</option>
+            </select>
+          </div>
+        </div>
+      )}
+    </div>
+
+{/* 5 TOGEATHER */}
+
+
+
+
+
+
+
+
+
+
     <div>
     <button
       type='submit'

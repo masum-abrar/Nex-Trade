@@ -11,14 +11,24 @@ const MarketPage = () => {
   const [subscriptions, setSubscriptions] = useState({})
   const [liveData, setLiveData] = useState({})
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedDataPoint, setSelectedDataPoint] = useState(null);
+  const [isBrokerage, setIsBrokerage] = useState(false);
 
+  const handleRowClick = (dataPoint) => {
+    setSelectedDataPoint(dataPoint);
+  };
+
+  const closeModal = () => {
+    setSelectedDataPoint(null);
+  };
+  
   // Load saved subscriptions from localStorage on mount
-  useEffect(() => {
-    const savedSubscriptions = localStorage.getItem('subscriptions')
-    if (savedSubscriptions) {
-      setSubscriptions(JSON.parse(savedSubscriptions))
-    }
-  }, [])
+  // useEffect(() => {
+  //   const savedSubscriptions = localStorage.getItem('subscriptions')
+  //   if (savedSubscriptions) {
+  //     setSubscriptions(JSON.parse(savedSubscriptions))
+  //   }
+  // }, [])
 
   // Save subscriptions to localStorage whenever they change
   useEffect(() => {
@@ -421,6 +431,7 @@ const MarketPage = () => {
                   <tr
                     key={dataPoint.securityId}
                     className='border-[#071824] border-3 border-b-gray-800 text-center'
+                    onClick={() => handleRowClick(dataPoint)}
                   >
                     <td className='p-2 px-8 text-left'>
                       {scriptName || 'N/A'}
@@ -452,7 +463,78 @@ const MarketPage = () => {
               })}
             </tbody>
           </table>
+          
         )}
+     {selectedDataPoint && (
+      <div className="fixed inset-0  bg-opacity-50 flex justify-center items-center ">
+        <div className="bg-[#151f36] text-white p-6 rounded-lg w-[600px]">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-4">
+            {/* <h2 className="text-lg font-semibold">Order Details</h2> */}
+            <button onClick={closeModal} className="text-gray-400 text-xl">
+              ✖
+            </button>
+          </div>
+
+          {/* Toggle Switch */}
+          <div className="flex justify-between items-center mb-3">
+            <span>Add Brokerage?</span>
+            <label className="relative inline-flex cursor-pointer items-center">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={isBrokerage}
+                onChange={() => setIsBrokerage(!isBrokerage)}
+              />
+              <div className="w-11 h-6 bg-gray-600 rounded-full peer-checked:bg-blue-500 transition"></div>
+            </label>
+          </div>
+
+          {/* Dropdown */}
+          <div className="mb-3">
+            <select className="w-full p-2 bg-gray-800 text-gray-300 rounded">
+              <option>Select or search a user...</option>
+              {/* Add user options dynamically */}
+            </select>
+          </div>
+
+          {/* Order Info */}
+          <div className="mb-4">
+            <h3 className="text-lg font-bold">{info.find(item => item.SEM_SMST_SECURITY_ID === parseInt(selectedDataPoint?.securityId))?.SEM_TRADING_SYMBOL || 'Unknown'}</h3>
+            <p className="text-gray-400 text-sm">27 MAR LTP {selectedDataPoint?.ltp || "N/A"}</p>
+
+          </div>
+
+          {/* Lot Size & Quantity */}
+          <div className="flex justify-between text-gray-300 mb-2 bg-gray-600 p-2">
+            <span>Lot Size: 1000</span>
+            <span>Qty: 1000</span>
+          </div>
+
+          {/* Input Fields */}
+          <div className="flex gap-2 mb-3">
+            <input type="text" value="Market" className="w-1/2 p-2 bg-gray-800 text-white rounded" readOnly />
+            <input type="number" value="1" className="w-1/2 p-2 bg-gray-800 text-white rounded" />
+          </div>
+
+          {/* Market / Manual Buttons */}
+          <div className="flex gap-2 mb-4">
+            <button className="w-1/2 p-2 border-2 border-blue-900 text-blue-400 rounded">Market</button>
+            <button className="w-1/2 p-2 border-2 border-gray-500 text-gray-300 rounded">Manual</button>
+          </div>
+
+          {/* BUY & SELL Buttons */}
+          <div className="flex gap-4">
+            <button className="w-1/2 bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded">
+              BUY
+            </button>
+            <button className="w-1/2 bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded">
+              SELL
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
       </div>
     </div>
   )
