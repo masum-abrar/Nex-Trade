@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 
 import { FaChartBar, FaShoppingCart, FaBolt, FaCog, FaChevronDown  } from "react-icons/fa";
 import BottomNav from "../BotomNav";
@@ -7,6 +7,27 @@ import BottomNav from "../BotomNav";
 const Page = () => {
     const [activeTab, setActiveTab] = useState("Open");
     const [showFunds, setShowFunds] = useState(false);
+    const [orders, setOrders] = useState([]);
+
+    useEffect(() => {
+      const fetchExecutedOrders = async () => {
+        try {
+          const response = await fetch("http://localhost:4000/api/v1/executed-orders");
+          const result = await response.json();
+          if (result.success) {
+            setOrders(result.orders);
+          } else {
+            console.error("Failed to fetch executed orders");
+          }
+        } catch (error) {
+          console.error("Error fetching orders:", error);
+        }
+      };
+  
+      if (activeTab === "Executed") {
+        fetchExecutedOrders();
+      }
+    }, [activeTab]);
   return (
     <div className="bg-gray-900 text-white min-h-screen flex flex-col justify-between">
       {/* Auto-running Notice */}
@@ -72,11 +93,51 @@ const Page = () => {
 
       {/* Tab Content */}
       <div className="mt-4 text-white p-4 ">
-        {activeTab === "Open" && <p>Showing Closed Orders...</p>}
-        {activeTab === "Executed" &&
-            <p>Showing Active Orders...</p>     
-         }
-        {activeTab === "Rejected" && <p>Showing Active Orders...</p>}
+        {activeTab === "Open" &&
+        
+        <p>Showing Closed Orders...</p>}
+scriptName
+{activeTab === "Executed" && (
+  <div>
+    {orders.length > 0 ? (
+      orders.map((order) => (
+        <div key={order.id} className="bg-gray-800 text-white p-4 rounded-lg mb-2 flex justify-between items-center">
+          
+          {/* Left Side: Order Type, Qty, Script Name */}
+          <div className="flex flex-col">
+            <span className={`text-lg font-bold ${order.orderType === "BUY" ? "text-green-400" : "text-red-400"}`}>
+              {order.orderType}
+            </span>
+            <p className="text-gray-300 text-sm">Qty: {order.quantity}</p>
+            <h3 className="text-lg font-semibold ">
+  {order.scriptName}
+</h3>
+
+          </div>
+
+          {/* Right Side: Time, Status, Order Type */}
+          <div className="flex flex-col text-right">
+    <div className="flex items-center gap-2">
+      <span className="text-gray-400 text-sm">{new Date(order.createdAt).toLocaleTimeString()}</span>
+      <span className="text-green-600 font-semibold">EXECUTED</span>
+    </div>
+    <span className="text-gray-400">{order.ltp}</span>
+    <span className="text-gray-400">{order.priceType}</span>
+  </div>
+
+        </div>
+      ))
+    ) : (
+      <p className="text-gray-400">No executed orders found.</p>
+    )}
+  </div>
+)}
+
+
+
+        {activeTab === "Rejected" &&
+        
+        <p>Showing Active Orders...</p>}
       </div>
       <div className="flex-1 flex flex-col  justify-center text-center">
        

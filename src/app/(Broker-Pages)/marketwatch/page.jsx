@@ -13,7 +13,16 @@ const MarketPage = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedDataPoint, setSelectedDataPoint] = useState(null);
   const [isBrokerage, setIsBrokerage] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
   const handleRowClick = (dataPoint) => {
     setSelectedDataPoint(dataPoint);
   };
@@ -31,9 +40,9 @@ const MarketPage = () => {
   // }, [])
 
   // Save subscriptions to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('subscriptions', JSON.stringify(subscriptions))
-  }, [subscriptions])
+  // useEffect(() => {
+  //   localStorage.setItem('subscriptions', JSON.stringify(subscriptions))
+  // }, [subscriptions])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -147,11 +156,14 @@ const MarketPage = () => {
         ? 'NSE_FNO'
         : instrument.SEM_EXM_EXCH_ID === 'BSE'
         ? 'BSE_FNO'
+        : instrument.SEM_EXM_EXCH_ID === 'MCX'
+        ? 'MCX_COMM'
+
         : instrument.SEM_EXM_EXCH_ID
 
     const subscribeMessage = {
-      RequestCode: 15,
-      InstrumentCount: 1,
+      RequestCode: 21,
+      InstrumentCount: 2,
       InstrumentList: [
         {
           ExchangeSegment: mappedSegment,
@@ -164,18 +176,18 @@ const MarketPage = () => {
     ws.send(JSON.stringify(subscribeMessage))
   }
 
-  function decodeBinaryData (uint8Array) {
+  function decodeBinaryData(uint8Array) {
     if (!uint8Array || uint8Array.byteLength < 4) {
-      console.error('Invalid binary data received.')
-      return null
+      console.error('Invalid binary data received.');
+      return null;
     }
-
-    // Implement binary decoding here based on Dhan API documentation.
-    // Example (replace with actual logic):
-    const byteLength = uint8Array?.byteLength //16
-    const idArray = Object.keys(subscriptions).map(Number)
-    console.log(idArray)
-
+    
+  
+    const byteLength = uint8Array.byteLength;
+    const idArray = Object.keys(subscriptions).map(Number);
+    console.log(idArray);
+    console.log(byteLength);
+  
     let response = {
       securityId: idArray,
       ltp: 'No Data',
@@ -191,84 +203,72 @@ const MarketPage = () => {
       dlv: 'No Data',
       bidPrice: 'No Data',
       askPrice: 'No Data'
-    }
+    };
+  
+    const dataView = new DataView(uint8Array.buffer);
+    if (byteLength < 8) return response;
+    
+    let offset = 8;
+    offset += 2;
 
-    const dataView = new DataView(uint8Array.buffer)
-    if (byteLength < 8) {
-      return response
-    }
+    if(byteLength < 10) return response;
+    response.ltp = (dataView.getFloat32(offset, true));
+    offset += 2;
 
-    let offset = 8
-    offset = offset + 4
-    //Example code that will need to be changed to match the Dhan API.
-    // const value = dataView.getUint32(0, true);
-    // const securityId = dataView.getInt32(offset, true);
-    // offset += 4;
-    response.ltp = dataView.getFloat32(offset, true)
-    offset = offset + 2
-    if (byteLength < 14) {
-      return response
-    }
-    response.ltq = dataView.getInt16(offset, true)
-    offset = offset + 4
-    if (byteLength < 18) {
-      return response
-    }
-    response.ltt = dataView.getInt32(offset, true)
-    offset = offset + 4
-    if (byteLength < 22) {
-      return response
-    }
-    response.atp = dataView.getFloat32(offset, true)
-    offset = offset + 4
-    if (byteLength < 26) {
-      return response
-    }
-    response.volume = dataView.getInt32(offset, true)
-    offset = offset + 4
-    if (byteLength < 30) {
-      return response
-    }
-    response.tsq = dataView.getInt32(offset, true)
-    offset = offset + 4
-    if (byteLength < 34) {
-      return response
-    }
-    response.tbq = dataView.getInt32(offset, true)
-    offset = offset + 4
-    if (byteLength < 38) {
-      return response
-    }
-    response.dov = dataView.getFloat32(offset, true)
-    offset = offset + 4
-    if (byteLength < 42) {
-      return response
-    }
-    response.dcv = dataView.getFloat32(offset, true)
-    offset = offset + 4
-    if (byteLength < 46) {
-      return response
-    }
-    response.dhv = dataView.getFloat32(offset, true)
-    offset = offset + 4
-    if (byteLength < 50) {
-      return response
-    }
-    response.dlv = dataView.getFloat32(offset, true)
-    offset = offset + 28
-    if (byteLength < 78) {
-      return response
-    }
-    response.bidPrice = dataView.getFloat32(offset, true)
-    offset = offset + 4
-    if (byteLength < 82) {
-      return response
-    }
-    response.askPrice = dataView.getFloat32(offset, true)
-
-    return response
+    if (byteLength < 14) return response;
+    
+    response.ltq = parseInt(dataView.getInt16(offset, true).toString().slice(0, 4)); 
+    offset += 4;
+    if (byteLength < 18) return response;
+    
+    response.ltt = parseInt(dataView.getInt32(offset, true).toString().slice(0, 4)); 
+    offset += 4;
+    if (byteLength < 22) return response;
+    
+    response.atp = parseFloat(dataView.getFloat32(offset, true).toFixed(2));
+    offset += 4;
+    if (byteLength < 26) return response;
+    
+    response.volume = parseInt(dataView.getInt32(offset, true).toString().slice(0, 4)); 
+    offset += 4;
+    if (byteLength < 30) return response;
+    
+    response.tsq = parseInt(dataView.getInt32(offset, true).toString().slice(0, 4)); 
+    offset += 4;
+    if (byteLength < 34) return response;
+    
+    response.tbq = parseInt(dataView.getInt32(offset, true).toString().slice(0, 4)); 
+    offset += 4;
+    if (byteLength < 38) return response;
+    
+    response.dov = parseFloat(dataView.getFloat32(offset, true).toFixed(2));
+    offset += 4;
+    if (byteLength < 42) return response;
+    
+    response.dcv = parseFloat(dataView.getFloat32(offset, true).toFixed(2));
+    offset += 4;
+    if (byteLength < 46) return response;
+    
+    response.dhv = parseFloat(dataView.getFloat32(offset, true).toFixed(2));
+    offset += 4;
+    if (byteLength < 50) return response;
+    
+    response.dlv = parseFloat(dataView.getFloat32(offset, true).toFixed(2));
+    offset += 28;
+    if (byteLength < 78) return response;
+    
+    response.bidPrice = parseFloat(dataView.getFloat32(offset, true).toFixed(2));
+    offset += 4;
+    if (byteLength < 82) return response;
+    
+    response.askPrice = parseFloat(dataView.getFloat32(offset, true).toFixed(2));
+    
+    return response;
+    
+  
+   
   }
-
+  
   useEffect(() => {
     if (searchTerm.trim() === '') {
       setSearchResults([])
@@ -278,17 +278,27 @@ const MarketPage = () => {
     const filtered = info.filter(row => {
       const instrumentName = row?.SEM_INSTRUMENT_NAME?.toUpperCase()
       const customSymbol = row?.SEM_CUSTOM_SYMBOL?.toUpperCase()
+      const exchid= row?.SEM_EXM_EXCH_ID?.toUpperCase()
       const searchText = searchTerm.toUpperCase()
 
-      if (activeTab === 'BSE-OPT' && instrumentName.includes('OPT')) {
+      if (activeTab === 'BSE-OPT' && exchid.includes('BSE') && instrumentName.includes('OPT')) {
         return customSymbol.includes(searchText)
       }
 
-      if (activeTab === 'BSE-FUT' && instrumentName.includes('FUT')) {
+      if (activeTab === 'BSE-FUT' && exchid.includes('BSE') && instrumentName.includes('FUT')) {
         return customSymbol.includes(searchText)
       }
 
-      if (activeTab === 'NSEFUT' && instrumentName.includes('OPT')) {
+      if (activeTab === 'NSEFUT' && exchid.includes('NSE') && instrumentName.includes('FUT')) {
+        return customSymbol.includes(searchText)
+      }
+      if (activeTab === 'NSEOPT' && exchid.includes('NSE') && instrumentName.includes('OPT')) {
+        return customSymbol.includes(searchText)
+      }
+      if (activeTab === 'MCXFUT' && exchid.includes('MCX') && instrumentName.includes('FUT')) {
+        return customSymbol.includes(searchText)
+      }
+      if (activeTab === 'MCXOPT' && exchid.includes('MCX') && instrumentName.includes('OPT')) {
         return customSymbol.includes(searchText)
       }
 
@@ -304,7 +314,10 @@ const MarketPage = () => {
         ? 'NSE_FNO'
         : exchangeSegment === 'BSE'
         ? 'BSE_FNO'
+        : exchangeSegment === 'MCX'
+        ? 'MCX_COMM'
         : exchangeSegment
+        
 
     console.log('Selected ID:', securityId)
     console.log('Mapped Exchange Segment:', mappedSegment)
@@ -453,11 +466,11 @@ const MarketPage = () => {
                     <td className='p-2'>{dataPoint.volumn || 'N/A'}</td>
                     <td className='p-2'>{dataPoint.tsq || 'N/A'}</td>
                     <td className='p-2'>{dataPoint.tbq || 'N/A'}</td> */}
-                    <td className='p-2'>{dataPoint.dov || 'N/A'}</td>
+                    <td className='p-2'>{dataPoint.averagePrice || 'N/A'}</td>
                     <td className='p-2'>{dataPoint.dcv || 'N/A'}</td>
                     <td className='p-2'>{dataPoint.dhv || 'N/A'}</td>
                     <td className='p-2'>{dataPoint.dlv || 'N/A'}</td>
-                    <td className='p-2'>{timeValue || 'N/A'}</td>
+                    <td className='p-2'>{dataPoint.time || 'N/A'}</td>
                   </tr>
                 )
               })}
@@ -499,11 +512,18 @@ const MarketPage = () => {
           </div>
 
           {/* Order Info */}
-          <div className="mb-4">
+         <div className='flex justify-between'>
+         <div className="mb-4">
             <h3 className="text-lg font-bold">{info.find(item => item.SEM_SMST_SECURITY_ID === parseInt(selectedDataPoint?.securityId))?.SEM_TRADING_SYMBOL || 'Unknown'}</h3>
             <p className="text-gray-400 text-sm">27 MAR LTP {selectedDataPoint?.ltp || "N/A"}</p>
 
           </div>
+          <div>
+          <p className="text-gray-400 text-sm"> {selectedDataPoint?.bidPrice || "N/A"}</p>
+          <p className="text-gray-400 text-sm"> {selectedDataPoint?.askPrice || "N/A"}</p>
+          <p className="text-gray-400 text-sm">{selectedDataPoint?.ltq || "N/A"}</p>
+          </div>
+         </div>
 
           {/* Lot Size & Quantity */}
           <div className="flex justify-between text-gray-300 mb-2 bg-gray-600 p-2">
@@ -525,10 +545,10 @@ const MarketPage = () => {
 
           {/* BUY & SELL Buttons */}
           <div className="flex gap-4">
-            <button className="w-1/2 bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded">
+            <button  className="w-1/2 bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded">
               BUY
             </button>
-            <button className="w-1/2 bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded">
+            <button  className="w-1/2 bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded">
               SELL
             </button>
           </div>
@@ -536,6 +556,7 @@ const MarketPage = () => {
       </div>
     )}
       </div>
+      
     </div>
   )
 }

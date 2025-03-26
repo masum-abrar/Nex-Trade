@@ -113,6 +113,18 @@ const Page = () => {
         // New fields for STKOPTBUY
         "stkOPTBUY_commission",    // STKOPTBUY Commission
         "stkOPTBUY_strike",        // STKOPTBUY Strike
+
+        //new 1
+        "STKOPTSELL_commission",   // STKOPTSELL Commission
+        "STKOPTSELL_strike",       // STKOPTSELL Strike
+
+        //new 2
+        "STKOPT_maxLots",          // STKOPT Max Lots
+        "STKOPT_orderLots",        // STKOPT Order Lots
+        "STKOPT_limitPercentage",
+        "STKOPT_intraday",
+        "STKOPT_holding",
+      
       ].includes(name)
         ? value ? parseInt(value, 10) : null // Convert to integer or set null
         : ["intradaySquare"].includes(name)
@@ -1097,11 +1109,159 @@ const Page = () => {
 
 {/* 5 TOGEATHER */}
 
+{/* no1 */}
+<div
+        onClick={() => setShowSTKOPTSELL(!showSTKOPTSELL)}
+        className="cursor-pointer mt-3 bg-gray-600 hover:bg-blue-700 w-[60%] text-white font-semibold py-2 px-4 rounded-md text-center transition duration-300"
+      >
+        {showSTKOPTSELL ? 'Hide Stock Option Selling' : 'Show Stock Option Selling'}
+      </div>
 
+      {/* Stock Option Selling (STKOPTSELL) Section */}
+      {showSTKOPTSELL && (
+      <div className="mt-4 bg-gray-900 p-6 rounded-lg shadow-md">
+    
+      {/* Commission Type Dropdown */}
+      <div className="mb-4">
+        <label className="block font-medium text-gray-300 text-sm">Stock Option Selling Commission Type:</label>
+        <select
+          name="STKOPTSELL_commissionType"
+          value={formData.STKOPTSELL_commissionType}
+          onChange={handleChange}
+          className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+        >
+          <option value="perCrore">perCrore</option>
+          <option value="perLot">perLot</option>
+        </select>
+      </div>
+    
+      {/* Commission */}
+      <div className="mb-4">
+        <label className="block font-medium text-gray-300 text-sm">STKOPTSELL Commission:</label>
+        <input
+          type="number"
+          name="STKOPTSELL_commission"
+          value={formData.STKOPTSELL_commission}
+          onChange={handleChange}
+          className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+        />
+      </div>
+    
+      {/* Strike */}
+      <div className="mb-4">
+        <label className="block font-medium text-gray-300 text-sm">Stock Option Selling Strike:</label>
+        <input
+          type="number"
+          name="STKOPTSELL_strike"
+          value={formData.STKOPTSELL_strike}
+          onChange={handleChange}
+          className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+        />
+      </div>
+    
+      {/* Allow Dropdown */}
+      <div className="mb-4">
+        <label className="block font-medium text-gray-300 text-sm">Stock Option Selling Allow:</label>
+        <select
+          name="STKOPTSELL_allow"
+          value={formData.STKOPTSELL_allow}
+          onChange={handleChange}
+          className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+        >
+          <option value="Not Allowed">Not Allowed</option>
+          <option value="Allowed">Allowed</option>
+        </select>
+      </div>
+    </div>
+    
+      )}
 
+{/* no2 */}
+<div
+  onClick={() => setShowSTKOPT(!showSTKOPT)}
+  className="cursor-pointer mt-3 bg-gray-600 hover:bg-blue-700 w-[60%] text-white font-semibold py-2 px-4 rounded-md text-center transition duration-300"
+>
+  {showSTKOPT ? 'Hide STKOPT' : 'Show STKOPT'}
+</div>
+{showSTKOPT && (
+  <div className="mt-4 bg-gray-900 p-6 rounded-lg shadow-md">
 
+  {/* Max Lots */}
+  <div className="mb-4">
+    <label className="block font-medium text-gray-300 text-sm">Stock Option Max Lots:</label>
+    <input
+      type="number"
+      name="STKOPT_maxLots"
+      value={formData.STKOPT_maxLots}
+      onChange={handleChange}
+      className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+    />
+  </div>
 
+  {/* Order Lots */}
+  <div className="mb-4">
+    <label className="block font-medium text-gray-300 text-sm">Stock Option Order Lots:</label>
+    <input
+      type="number"
+      name="STKOPT_orderLots"
+      value={formData.STKOPT_orderLots}
+      onChange={handleChange}
+      className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+    />
+  </div>
 
+  {/* Limit Percentage */}
+  <div className="mb-4">
+    <label className="block font-medium text-gray-300 text-sm">Stock Option Limit Percentage:</label>
+    <input
+      type="number"
+      name="STKOPT_limitPercentage"
+      value={formData.STKOPT_limitPercentage}
+      onChange={handleChange}
+      className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+    />
+  </div>
+
+  {/* Intraday */}
+  <div className="mb-4">
+    <label className="block font-medium text-gray-300 text-sm">Stock Option Intraday:</label>
+    <input
+      type="number"
+      name="STKOPT_intraday"
+      value={formData.STKOPT_intraday}
+      onChange={handleChange}
+      className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+    />
+  </div>
+
+  {/* Holding */}
+  <div className="mb-4">
+    <label className="block font-medium text-gray-300 text-sm">Stock Option Holding:</label>
+    <input
+      type="number"
+      name="STKOPT_holding"
+      value={formData.STKOPT_holding}
+      onChange={handleChange}
+      className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+    />
+  </div>
+
+  {/* Selling Overnight Dropdown */}
+  <div className="mb-4">
+    <label className="block font-medium text-gray-300 text-sm">Stock Option Selling Overnight:</label>
+    <select
+      name="STKOPT_sellingOvernight"
+      value={formData.STKOPT_sellingOvernight}
+      onChange={handleChange}
+      className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
+    >
+      <option value="Not Allowed">Not Allowed</option>
+      <option value="Allowed">Allowed</option>
+    </select>
+  </div>
+</div>
+
+)}
 
 
 
