@@ -229,19 +229,19 @@ const calculatedQty = orderLots * lotSize;
   
     let response = {
       securityId: idArray,
-      ltp: 'No Data',
-      ltq: 'No Data',
-      ltt: 'No Data',
-      atp: 'No Data',
-      volume: 'No Data',
-      tsq: 'No Data',
-      tbq: 'No Data',
-      dov: 'No Data',
-      dcv: 'No Data',
-      dhv: 'No Data',
-      dlv: 'No Data',
-      bidPrice: 'No Data',
-      askPrice: 'No Data'
+      ltp: 1.4,
+      ltq: 3.4,
+      ltt: 4.4,
+      atp: 6.4,
+      volume: 76,
+      tsq: 45,
+      tbq: 34,
+      dov: 94,
+      dcv: 98.3,
+      dhv: 4.545,
+      dlv: 5.65,
+      bidPrice: 8765.5,
+      askPrice: 767.7
     };
   
     const dataView = new DataView(uint8Array.buffer);
