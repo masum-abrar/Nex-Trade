@@ -43,7 +43,7 @@ const calculatedQty = orderLots * lotSize;
     orderType, // "BUY" or "SELL"
     lotSize: 1000,
     orderLots: 50,
-    quantity: 1000,
+    quantity: calculatedQty,
     priceType: isStopLossTarget ? "Limit" : "Market",
     isStopLossTarget,
     stopLoss: isStopLossTarget ? parseFloat(document.querySelector('input[placeholder="Stop Loss"]').value) || null : null,
