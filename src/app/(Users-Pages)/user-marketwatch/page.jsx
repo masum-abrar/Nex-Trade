@@ -1,6 +1,9 @@
 "use client";
 import React, { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 import { FaTrash, FaPlus, FaChartBar, FaShoppingCart, FaBolt, FaCog } from "react-icons/fa";
 import BottomNav from "../BotomNav";
@@ -62,9 +65,9 @@ const calculatedQty = orderLots * lotSize;
 
     const result = await response.json();
     if (result.success) {
-      alert(`Order placed successfully: ${orderType}`);
+      toast.success(`Order placed successfully: ${orderType}`);
     } else {
-      alert("Error placing order");
+      toast.error('Error placing order');
     }
   } catch (error) {
     console.error("Order submission error:", error);
@@ -665,6 +668,7 @@ const calculatedQty = orderLots * lotSize;
  <div className=' mt-auto w-full'>
  <BottomNav/>
  </div>
+ <ToastContainer />
     </div>
   );
 };
