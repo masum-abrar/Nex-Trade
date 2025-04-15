@@ -12,17 +12,20 @@ export default function MarketFeed() {
     socket.onopen = () => {
       console.log('WebSocket connected!');
 
-      const payload = {
-        RequestCode: 21,
-        InstrumentCount: 2,
-        InstrumentList: [
-          {
-            ExchangeSegment: "NSE_FNO",
-            SecurityId: "119676",
-          },
-        ],
-      };
-      
+      const payload ={
+    RequestCode : 15,
+    InstrumentCount : 2,
+    InstrumentList : [
+        {
+            ExchangeSegment : "NSE_EQ",
+            SecurityId : "1333"
+        },
+        {
+            ExchangeSegment : "BSE_EQ",
+            SecurityId : "532540"
+        }
+    ]
+}
   
       
       socket.send(JSON.stringify(payload));

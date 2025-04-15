@@ -12,7 +12,7 @@ const Page = () => {
     useEffect(() => {
       const fetchExecutedOrders = async () => {
         try {
-          const response = await fetch("http://localhost:4000/api/v1/executed-orders");
+          const response = await fetch("https://nex-trade-backend.vercel.app/api/v1/executed-orders");
           const result = await response.json();
           if (result.success) {
             setOrders(result.orders);

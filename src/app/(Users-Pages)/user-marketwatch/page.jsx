@@ -17,6 +17,10 @@ const MarketWatch = () => {
   const [selectedDataPoint, setSelectedDataPoint] = useState(null);
   const [isBrokerage, setIsBrokerage] = useState(false);
   const [isStopLossTarget, setIsStopLossTarget] = useState(false);
+  const [orderLots, setOrderLots] = useState(1);
+const lotSize = 30;
+const calculatedQty = orderLots * lotSize;
+
 
 
   const handleRowClick = (dataPoint) => {
@@ -48,7 +52,7 @@ const MarketWatch = () => {
   };
 
   try {
-    const response = await fetch("http://localhost:4000/api/v1/tradeorder", {
+    const response = await fetch("https://nex-trade-backend.vercel.app/api/v1/tradeorder", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -246,9 +250,13 @@ const MarketWatch = () => {
     let offset = 8;
     offset += 4;
     
-    response.ltp = (dataView.getFloat32(offset, true));
-    offset += 2;
-    if (byteLength < 14) return response;
+    if (offset + 4 > dataView.byteLength) {
+      console.error("Attempted to read beyond buffer size.");
+      return response;  // Stop execution
+  }
+  response.ltp = dataView.getFloat32(offset, true);
+  offset += 4;
+  
     
     response.ltq = parseInt(dataView.getInt16(offset, true).toString().slice(0, 4)); 
     offset += 4;
@@ -529,7 +537,7 @@ const MarketWatch = () => {
                         {dataPoint.bidPrice || 'N/A'}
                       </span>
                     </td>
-                    <td className='p-2'>{dataPoint.ltp || 'N/A'}</td>
+                    <td className='p-2'>{dataPoint.ltp || 'null'}</td>
                     <td className='p-2'>{dataPoint.ltq || 'N/A'}</td>
                     <td className='p-2'>{dataPoint.ltt || 'N/A'}</td>
                     {/* <td className='p-2'>{dataPoint.atp || 'N/A'}</td>
@@ -588,13 +596,13 @@ const MarketWatch = () => {
       </div>
 
       {/* Lot Size & Quantity */}
-      <div className="flex justify-between text-gray-300 mb-2 bg-gray-800  p-3 text-sm">
-        <span>Max Lots : 50</span>
-        <span>Order Lots: 50</span>
-        <span>Lot Size : 1000</span>
-        <span>Qty: 1000</span>
+<div className="flex justify-between text-gray-300 mb-2 bg-gray-800 p-3 text-sm">
+  <span>Max Lots : 50</span>
+  <span>Order Lots: 50</span>
+  <span>Lot Size : {lotSize}</span>
+  <span>Qty: {calculatedQty}</span>
+</div>
 
-      </div>
 
       {/* Stop Loss / Target Input Fields */}
       {isStopLossTarget && (
@@ -607,7 +615,13 @@ const MarketWatch = () => {
       {/* Input Fields */}
       <div className="flex gap-2 mb-3">
         <input type="text" value="Market" className="w-1/2 p-2 bg-gray-800 text-white rounded" readOnly />
-        <input type="number" value="1" className="w-1/2 p-2 bg-gray-800 text-white rounded" />
+        <input
+  type="number"
+  value={orderLots}
+  onChange={(e) => setOrderLots(e.target.value)}
+  className="w-1/2 p-2 bg-gray-800 text-white rounded"
+/>
+
       </div>
 
       {/* Market / Manual Buttons */}

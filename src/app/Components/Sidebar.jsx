@@ -2,14 +2,23 @@
 
 import { Menu, Search } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Cookies from "js-cookie"; // Import js-cookie
 
 export const Sidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
+
+  // Load user info from cookies when the sidebar mounts
+  useEffect(() => {
+    const storedUser = Cookies.get('userInfo');
+    if (storedUser) {
+      setUserInfo(JSON.parse(storedUser));
+    }
+  }, []);
 
   return (
     <>
-    
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         className="md:hidden fixed top-4 left-4 z-50 text-white"
@@ -19,16 +28,18 @@ export const Sidebar = () => {
 
       {/* Sidebar */}
       <div
-  className={`${
-    isSidebarOpen ? "translate-x-0 z-50" : "-translate-x-full"
-  } md:translate-x-0 fixed md:static w-64 bg-[#071824] text-white flex flex-col transition-transform duration-300 ease-in-out z-40 border-r-2 border-gray-500  h-screen`}
->
-
+        className={`${
+          isSidebarOpen ? "translate-x-0 z-50" : "-translate-x-full"
+        } md:translate-x-0 fixed md:static w-64 bg-[#071824] text-white flex flex-col transition-transform duration-300 ease-in-out z-40 border-r-2 border-gray-500 h-screen`}
+      >
         <div className="p-4 border-b border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">FTADMIN</h2>
-            <span className="text-sm text-gray-400">Broker</span>
+            <h2 className="text-lg font-semibold">FT</h2>
+            {userInfo && (
+              <span className="text-sm text-gray-400">{userInfo.role}</span>
+            )}
           </div>
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -38,16 +49,18 @@ export const Sidebar = () => {
             />
           </div>
         </div>
-        
-        <div className="p-4 border-b border-gray-700">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-2">
-              <span>FTADMIN</span>
-              <span className="text-sm text-gray-400">FTADMIN</span>
+
+        {/* Show logged-in user info */}
+        {userInfo && (
+          <div className="p-4 border-b border-gray-700">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-2">
+                <span>{userInfo.username}</span>
+                <span className="text-sm text-gray-400">{userInfo.role}</span>
+              </div>
             </div>
-            <span className="text-sm text-gray-400">Broker</span>
           </div>
-        </div>
+        )}
 
         <div className="p-4 flex justify-between items-center border-b border-gray-700">
           <Link href="/create-user" className="text-sm hover:text-blue-400">
@@ -76,7 +89,7 @@ export const Sidebar = () => {
       {/* Overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0  bg-opacity-50 z-30  md:hidden"
+          className="fixed inset-0 bg-opacity-50 z-30 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}

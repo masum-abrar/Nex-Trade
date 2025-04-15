@@ -18,7 +18,7 @@ const HomePage = () => {
         <div className="flex flex-col">
       {/* Top User Info Box */}
       <div className="flex flex-wrap  items-center text-white bg-[#071824] p-8 border-b border-gray-700  shadow">
-        <p className="font-medium">USER: FTADMIN</p>
+        {/* <p className="font-medium">USER: FTADMIN</p> */}
         <div className="flex flex-wrap gap-4 ml-auto text-white">
           <input
             type="date"

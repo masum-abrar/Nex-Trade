@@ -11,26 +11,26 @@ const MarketPage = () => {
   const [subscriptions, setSubscriptions] = useState({})
   const [liveData, setLiveData] = useState({})
   const [isLoading, setIsLoading] = useState(true)
-  const [selectedDataPoint, setSelectedDataPoint] = useState(null);
-  const [isBrokerage, setIsBrokerage] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [selectedDataPoint, setSelectedDataPoint] = useState(null)
+  const [isBrokerage, setIsBrokerage] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
-  const handleRowClick = (dataPoint) => {
-    setSelectedDataPoint(dataPoint);
-  };
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
+  const handleRowClick = dataPoint => {
+    setSelectedDataPoint(dataPoint)
+  }
 
   const closeModal = () => {
-    setSelectedDataPoint(null);
-  };
-  
+    setSelectedDataPoint(null)
+  }
+
   // Load saved subscriptions from localStorage on mount
   // useEffect(() => {
   //   const savedSubscriptions = localStorage.getItem('subscriptions')
@@ -158,7 +158,6 @@ const MarketPage = () => {
         ? 'BSE_FNO'
         : instrument.SEM_EXM_EXCH_ID === 'MCX'
         ? 'MCX_COMM'
-
         : instrument.SEM_EXM_EXCH_ID
 
     const subscribeMessage = {
@@ -176,18 +175,17 @@ const MarketPage = () => {
     ws.send(JSON.stringify(subscribeMessage))
   }
 
-  function decodeBinaryData(uint8Array) {
-    if (!uint8Array || uint8Array.byteLength < 4) {
-      console.error('Invalid binary data received.');
-      return null;
+  function decodeBinaryData (uint8Array) {
+    if (!uint8Array || uint8Array.byteLength < 10) {
+      console.error('Invalid binary data received.')
+      return null
     }
-    
-  
-    const byteLength = uint8Array.byteLength;
-    const idArray = Object.keys(subscriptions).map(Number);
-    console.log(idArray);
-    console.log(byteLength);
-  
+
+    const byteLength = uint8Array.byteLength
+    const idArray = Object.keys(subscriptions).map(Number)
+    console.log(idArray)
+    console.log(byteLength)
+
     let response = {
       securityId: idArray,
       ltp: 'No Data',
@@ -203,72 +201,80 @@ const MarketPage = () => {
       dlv: 'No Data',
       bidPrice: 'No Data',
       askPrice: 'No Data'
-    };
-  
-    const dataView = new DataView(uint8Array.buffer);
-    if (byteLength < 8) return response;
-    
-    let offset = 8;
-    offset += 2;
+    }
 
-    if(byteLength < 10) return response;
-    response.ltp = (dataView.getFloat32(offset, true));
-    offset += 2;
+    const dataView = new DataView(uint8Array.buffer)
+    //  if (byteLength < 8) return response
+    let offset = 8
 
-    if (byteLength < 14) return response;
-    
-    response.ltq = parseInt(dataView.getInt16(offset, true).toString().slice(0, 4)); 
-    offset += 4;
-    if (byteLength < 18) return response;
-    
-    response.ltt = parseInt(dataView.getInt32(offset, true).toString().slice(0, 4)); 
-    offset += 4;
-    if (byteLength < 22) return response;
-    
-    response.atp = parseFloat(dataView.getFloat32(offset, true).toFixed(2));
-    offset += 4;
-    if (byteLength < 26) return response;
-    
-    response.volume = parseInt(dataView.getInt32(offset, true).toString().slice(0, 4)); 
-    offset += 4;
-    if (byteLength < 30) return response;
-    
-    response.tsq = parseInt(dataView.getInt32(offset, true).toString().slice(0, 4)); 
-    offset += 4;
-    if (byteLength < 34) return response;
-    
-    response.tbq = parseInt(dataView.getInt32(offset, true).toString().slice(0, 4)); 
-    offset += 4;
-    if (byteLength < 38) return response;
-    
-    response.dov = parseFloat(dataView.getFloat32(offset, true).toFixed(2));
-    offset += 4;
-    if (byteLength < 42) return response;
-    
-    response.dcv = parseFloat(dataView.getFloat32(offset, true).toFixed(2));
-    offset += 4;
-    if (byteLength < 46) return response;
-    
-    response.dhv = parseFloat(dataView.getFloat32(offset, true).toFixed(2));
-    offset += 4;
-    if (byteLength < 50) return response;
-    
-    response.dlv = parseFloat(dataView.getFloat32(offset, true).toFixed(2));
-    offset += 28;
-    if (byteLength < 78) return response;
-    
-    response.bidPrice = parseFloat(dataView.getFloat32(offset, true).toFixed(2));
-    offset += 4;
-    if (byteLength < 82) return response;
-    
-    response.askPrice = parseFloat(dataView.getFloat32(offset, true).toFixed(2));
-    
-    return response;
-    
-  
-   
+    if (byteLength < offset + 2) return response
+    offset += 2 // Adjust offset
+
+    if (byteLength < offset + 4) return response
+    response.ltp = dataView.getFloat32(offset, true)
+    offset += 4
+
+    if (byteLength < 14) return response
+
+    response.ltq = parseInt(
+      dataView.getInt16(offset, true).toString().slice(0, 4)
+    )
+    offset += 4
+    if (byteLength < 18) return response
+
+    response.ltt = parseInt(
+      dataView.getInt32(offset, true).toString().slice(0, 4)
+    )
+    offset += 4
+    if (byteLength < 22) return response
+
+    response.atp = parseFloat(dataView.getFloat32(offset, true).toFixed(2))
+    offset += 4
+    if (byteLength < 26) return response
+
+    response.volume = parseInt(
+      dataView.getInt32(offset, true).toString().slice(0, 4)
+    )
+    offset += 4
+    if (byteLength < 30) return response
+
+    response.tsq = parseInt(
+      dataView.getInt32(offset, true).toString().slice(0, 4)
+    )
+    offset += 4
+    if (byteLength < 34) return response
+
+    response.tbq = parseInt(
+      dataView.getInt32(offset, true).toString().slice(0, 4)
+    )
+    offset += 4
+    if (byteLength < 38) return response
+
+    response.dov = parseFloat(dataView.getFloat32(offset, true).toFixed(2))
+    offset += 4
+    if (byteLength < 42) return response
+
+    response.dcv = parseFloat(dataView.getFloat32(offset, true).toFixed(2))
+    offset += 4
+    if (byteLength < 46) return response
+
+    response.dhv = parseFloat(dataView.getFloat32(offset, true).toFixed(2))
+    offset += 4
+    if (byteLength < 50) return response
+
+    response.dlv = parseFloat(dataView.getFloat32(offset, true).toFixed(2))
+    offset += 28
+    if (byteLength < 78) return response
+
+    response.bidPrice = parseFloat(dataView.getFloat32(offset, true).toFixed(2))
+    offset += 4
+    if (byteLength < 82) return response
+
+    response.askPrice = parseFloat(dataView.getFloat32(offset, true).toFixed(2))
+
+    return response
   }
-  
+
   useEffect(() => {
     if (searchTerm.trim() === '') {
       setSearchResults([])
@@ -278,27 +284,51 @@ const MarketPage = () => {
     const filtered = info.filter(row => {
       const instrumentName = row?.SEM_INSTRUMENT_NAME?.toUpperCase()
       const customSymbol = row?.SEM_CUSTOM_SYMBOL?.toUpperCase()
-      const exchid= row?.SEM_EXM_EXCH_ID?.toUpperCase()
+      const exchid = row?.SEM_EXM_EXCH_ID?.toUpperCase()
       const searchText = searchTerm.toUpperCase()
 
-      if (activeTab === 'BSE-OPT' && exchid.includes('BSE') && instrumentName.includes('OPT')) {
+      if (
+        activeTab === 'BSE-OPT' &&
+        exchid.includes('BSE') &&
+        instrumentName.includes('OPT')
+      ) {
         return customSymbol.includes(searchText)
       }
 
-      if (activeTab === 'BSE-FUT' && exchid.includes('BSE') && instrumentName.includes('FUT')) {
+      if (
+        activeTab === 'BSE-FUT' &&
+        exchid.includes('BSE') &&
+        instrumentName.includes('FUT')
+      ) {
         return customSymbol.includes(searchText)
       }
 
-      if (activeTab === 'NSEFUT' && exchid.includes('NSE') && instrumentName.includes('FUT')) {
+      if (
+        activeTab === 'NSEFUT' &&
+        exchid.includes('NSE') &&
+        instrumentName.includes('FUT')
+      ) {
         return customSymbol.includes(searchText)
       }
-      if (activeTab === 'NSEOPT' && exchid.includes('NSE') && instrumentName.includes('OPT')) {
+      if (
+        activeTab === 'NSEOPT' &&
+        exchid.includes('NSE') &&
+        instrumentName.includes('OPT')
+      ) {
         return customSymbol.includes(searchText)
       }
-      if (activeTab === 'MCXFUT' && exchid.includes('MCX') && instrumentName.includes('FUT')) {
+      if (
+        activeTab === 'MCXFUT' &&
+        exchid.includes('MCX') &&
+        instrumentName.includes('FUT')
+      ) {
         return customSymbol.includes(searchText)
       }
-      if (activeTab === 'MCXOPT' && exchid.includes('MCX') && instrumentName.includes('OPT')) {
+      if (
+        activeTab === 'MCXOPT' &&
+        exchid.includes('MCX') &&
+        instrumentName.includes('OPT')
+      ) {
         return customSymbol.includes(searchText)
       }
 
@@ -317,7 +347,6 @@ const MarketPage = () => {
         : exchangeSegment === 'MCX'
         ? 'MCX_COMM'
         : exchangeSegment
-        
 
     console.log('Selected ID:', securityId)
     console.log('Mapped Exchange Segment:', mappedSegment)
@@ -342,7 +371,8 @@ const MarketPage = () => {
   return (
     <div className='bg-[#071824] min-h-screen text-white'>
       <Navbar />
-      <div className='flex space-x-4 mt-6 p-4 border-gray-600 border-b overflow-x-auto'>
+      {/* Navigation Tabs */}
+      <div className='flex space-x-4 mt-6 p-4 border-gray-600 border-b overflow-x-auto whitespace-nowrap'>
         {['NSEFUT', 'NSEOPT', 'MCXFUT', 'MCXOPT', 'BSE-FUT', 'BSE-OPT'].map(
           item => (
             <button
@@ -367,7 +397,7 @@ const MarketPage = () => {
         />
         <input
           type='text'
-          placeholder='Search & Add New Symbols'
+          placeholder='Search & Add New SymbolNames'
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           className='bg-[#1A2C38] p-2 border rounded-md w-full text-white placeholder-gray-400'
@@ -392,7 +422,8 @@ const MarketPage = () => {
                     onChange={() =>
                       handleCheckboxChange(
                         item.SEM_SMST_SECURITY_ID,
-                        item.SEM_EXM_EXCH_ID
+                        item.SEM_EXM_EXCH_ID,
+                        item.SEM_TRADING_SYMBOL
                       )
                     }
                     className='w-4 h-4'
@@ -407,29 +438,83 @@ const MarketPage = () => {
 
       <div className='p-4'>
         {isLoading ? (
-          <p>Loading live data...</p>
+          <p className='text-sm text-center'>Loading live data...</p>
         ) : (
-          <table className='border border-gray-800 w-full border-collapse'>
-            <thead>
-              <tr className='bg-gray-800 text-white'>
-                <th className='p-2 px-8 text-left'>Script</th>
-                <th className='p-2'>Bid</th>
-                <th className='p-2'>Ask</th>
-                <th className='p-2'>Ltp</th>
-                <th className='p-2'>Ch</th>
-                <th className='p-2'>Chp</th>
-                {/* <th className='p-2'>Avg Price</th>
+          <>
+            {/* Desktop View (Table) */}
+            <div className='hidden md:block overflow-x-auto'>
+              <table className='border border-gray-800 w-full border-collapse'>
+                <thead>
+                  <tr className='bg-gray-800 text-white'>
+                    <th className='p-2 px-8 text-left'>Script</th>
+                    <th className='p-2'>Bid</th>
+                    <th className='p-2'>Ask</th>
+                    <th className='p-2'>Ltp</th>
+                    <th className='p-2'>Ch</th>
+                    <th className='p-2'>Chp</th>
+                    {/* <th className='p-2'>Avg Price</th>
                 <th className='p-2'>Volumn</th>
                 <th className='p-2'>Sell</th>
                 <th className='p-2'>Buy</th> */}
-                <th className='p-2'>Open</th>
-                <th className='p-2'>Close</th>
-                <th className='p-2'>High</th>
-                <th className='p-2'>Low</th>
-                <th className='p-2'>Time</th>
-              </tr>
-            </thead>
-            <tbody>
+                    <th className='p-2'>Open</th>
+                    <th className='p-2'>Close</th>
+                    <th className='p-2'>High</th>
+                    <th className='p-2'>Low</th>
+                    <th className='p-2'>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.values(liveData).map(dataPoint => {
+                    const scriptName =
+                      info.find(
+                        item =>
+                          item.SEM_SMST_SECURITY_ID ===
+                          parseInt(dataPoint.securityId)
+                      )?.SEM_TRADING_SYMBOL || 'Unknown'
+
+                    return (
+                      <tr
+                        key={dataPoint.securityId}
+                        className='border-[#071824] border-3 border-b-gray-800 text-center'
+                        onClick={() => handleRowClick(dataPoint)}
+                      >
+                        <td className='p-2 px-8 text-left'>
+                          {scriptName || 'N/A'}
+                        </td>
+                        <td className='p-2'>
+                          <span className='text-green-500'>
+                            {dataPoint.bidPrice || 'N/A'}
+                          </span>
+                        </td>
+                        <td className='p-2'>
+                          <span className='text-green-500'>
+                            {dataPoint.bidPrice || 'N/A'}
+                          </span>
+                        </td>
+                        <td className='p-2'>{dataPoint.ltp || 'N/A'}</td>
+                        <td className='p-2'>{dataPoint.ltq || 'N/A'}</td>
+                        <td className='p-2'>{dataPoint.ltt || 'N/A'}</td>
+                        {/* <td className='p-2'>{dataPoint.atp || 'N/A'}</td>
+                    <td className='p-2'>{dataPoint.volumn || 'N/A'}</td>
+                    <td className='p-2'>{dataPoint.tsq || 'N/A'}</td>
+                    <td className='p-2'>{dataPoint.tbq || 'N/A'}</td> */}
+                        <td className='p-2'>
+                          {dataPoint.averagePrice || 'N/A'}
+                        </td>
+                        <td className='p-2'>{dataPoint.dcv || 'N/A'}</td>
+                        <td className='p-2'>{dataPoint.dhv || 'N/A'}</td>
+                        <td className='p-2'>{dataPoint.dlv || 'N/A'}</td>
+                        <td className='p-2'>
+                          {new Date().toLocaleTimeString()}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {/* Mobile View (Card Format) */}
+            <div className='md:hidden space-y-4'>
               {Object.values(liveData).map(dataPoint => {
                 const scriptName =
                   info.find(
@@ -437,126 +522,164 @@ const MarketPage = () => {
                       item.SEM_SMST_SECURITY_ID ===
                       parseInt(dataPoint.securityId)
                   )?.SEM_TRADING_SYMBOL || 'Unknown'
-                const timeValue = dataPoint.timestamp
-                  ? new Date(dataPoint.timestamp).toLocaleTimeString()
-                  : 'N/A'
+
                 return (
-                  <tr
+                  <div
                     key={dataPoint.securityId}
-                    className='border-[#071824] border-3 border-b-gray-800 text-center'
+                    className='bg-[#213743] shadow-md p-3 rounded-md'
                     onClick={() => handleRowClick(dataPoint)}
                   >
-                    <td className='p-2 px-8 text-left'>
-                      {scriptName || 'N/A'}
-                    </td>
-                    <td className='p-2'>
-                      <span className='text-green-500'>
-                        {dataPoint.bidPrice || 'N/A'}
+                    <div className='flex justify-between'>
+                      <span className='font-semibold text-xs'>Qty : 0</span>
+                      <span className='text-gray-100 text-xs'>
+                        LTP : {dataPoint?.ltp || 'N/A'}
                       </span>
-                    </td>
-                    <td className='p-2'>
-                      <span className='text-green-500'>
-                        {dataPoint.bidPrice || 'N/A'}
+                    </div>
+                    <div className='flex justify-between my-2 text-md'>
+                      <div>
+                        <span className='text-gray-100'>
+                          {scriptName.includes('-')
+                            ? scriptName.split('-')[0] // Show only before '-'
+                            : scriptName.length > 10
+                            ? scriptName.slice(0, 10) + '…' // Shorten long strings
+                            : scriptName}
+                        </span>
+                      </div>
+                      <div className='flex justify-between gap-x-5'>
+                        <span className='text-green-600'>
+                          {dataPoint?.bidPrice || 'N/A'}
+                        </span>
+                        <span className='text-red-600'>
+                          {dataPoint?.askPrice || 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className='flex justify-between'>
+                      <span className='text-gray-100 text-xs'>
+                        {scriptName.includes('-')
+                          ? scriptName.split('-')[1] // Show only before '-'
+                          : scriptName.length > 10
+                          ? scriptName.slice(0, 10) + '…' // Shorten long strings
+                          : scriptName}
                       </span>
-                    </td>
-                    <td className='p-2'>{dataPoint.ltp || 'N/A'}</td>
-                    <td className='p-2'>{dataPoint.ltq || 'N/A'}</td>
-                    <td className='p-2'>{dataPoint.ltt || 'N/A'}</td>
-                    {/* <td className='p-2'>{dataPoint.atp || 'N/A'}</td>
-                    <td className='p-2'>{dataPoint.volumn || 'N/A'}</td>
-                    <td className='p-2'>{dataPoint.tsq || 'N/A'}</td>
-                    <td className='p-2'>{dataPoint.tbq || 'N/A'}</td> */}
-                    <td className='p-2'>{dataPoint.averagePrice || 'N/A'}</td>
-                    <td className='p-2'>{dataPoint.dcv || 'N/A'}</td>
-                    <td className='p-2'>{dataPoint.dhv || 'N/A'}</td>
-                    <td className='p-2'>{dataPoint.dlv || 'N/A'}</td>
-                    <td className='p-2'>{dataPoint.time || 'N/A'}</td>
-                  </tr>
+
+                      <span className='text-gray-100 text-xs'>
+                        {dataPoint?.dhv || 'N/A'} ({dataPoint?.dlv || 'N/A'})
+                      </span>
+                    </div>
+                  </div>
                 )
               })}
-            </tbody>
-          </table>
-          
+            </div>
+          </>
         )}
-     {selectedDataPoint && (
-      <div className="fixed inset-0  bg-opacity-50 flex justify-center items-center ">
-        <div className="bg-[#151f36] text-white p-6 rounded-lg w-[600px]">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-4">
-            {/* <h2 className="text-lg font-semibold">Order Details</h2> */}
-            <button onClick={closeModal} className="text-gray-400 text-xl">
-              ✖
-            </button>
-          </div>
 
-          {/* Toggle Switch */}
-          <div className="flex justify-between items-center mb-3">
-            <span>Add Brokerage?</span>
-            <label className="relative inline-flex cursor-pointer items-center">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={isBrokerage}
-                onChange={() => setIsBrokerage(!isBrokerage)}
-              />
-              <div className="w-11 h-6 bg-gray-600 rounded-full peer-checked:bg-blue-500 transition"></div>
-            </label>
-          </div>
+        {selectedDataPoint && (
+          <div className='fixed inset-0 flex justify-center items-center bg-opacity-50'>
+            <div className='bg-[#151f36] p-6 rounded-lg w-[600px] text-white'>
+              {/* Header */}
+              <div className='flex justify-between items-center mb-4'>
+                {/* <h2 className="font-semibold text-lg">Order Details</h2> */}
+                <button onClick={closeModal} className='text-gray-400 text-xl'>
+                  ✖
+                </button>
+              </div>
 
-          {/* Dropdown */}
-          <div className="mb-3">
-            <select className="w-full p-2 bg-gray-800 text-gray-300 rounded">
-              <option>Select or search a user...</option>
-              {/* Add user options dynamically */}
-            </select>
-          </div>
+              {/* Toggle Switch */}
+              <div className='flex justify-between items-center mb-3'>
+                <span>Add Brokerage?</span>
+                <label className='inline-flex relative items-center cursor-pointer'>
+                  <input
+                    type='checkbox'
+                    className='sr-only peer'
+                    checked={isBrokerage}
+                    onChange={() => setIsBrokerage(!isBrokerage)}
+                  />
+                  <div className='bg-gray-600 peer-checked:bg-blue-500 rounded-full w-11 h-6 transition'></div>
+                </label>
+              </div>
 
-          {/* Order Info */}
-         <div className='flex justify-between'>
-         <div className="mb-4">
-            <h3 className="text-lg font-bold">{info.find(item => item.SEM_SMST_SECURITY_ID === parseInt(selectedDataPoint?.securityId))?.SEM_TRADING_SYMBOL || 'Unknown'}</h3>
-            <p className="text-gray-400 text-sm">27 MAR LTP {selectedDataPoint?.ltp || "N/A"}</p>
+              {/* Dropdown */}
+              <div className='mb-3'>
+                <select className='bg-gray-800 p-2 rounded w-full text-gray-300'>
+                  <option>Select or search a user...</option>
+                  {/* Add user options dynamically */}
+                </select>
+              </div>
 
-          </div>
-          <div>
-          <p className="text-gray-400 text-sm"> {selectedDataPoint?.bidPrice || "N/A"}</p>
-          <p className="text-gray-400 text-sm"> {selectedDataPoint?.askPrice || "N/A"}</p>
-          <p className="text-gray-400 text-sm">{selectedDataPoint?.ltq || "N/A"}</p>
-          </div>
-         </div>
+              {/* Order Info */}
+              <div className='flex justify-between'>
+                <div className='mb-4'>
+                  <h3 className='font-bold text-lg'>
+                    {info.find(
+                      item =>
+                        item.SEM_SMST_SECURITY_ID ===
+                        parseInt(selectedDataPoint?.securityId)
+                    )?.SEM_TRADING_SYMBOL || 'Unknown'}
+                  </h3>
+                  <p className='text-gray-400 text-sm'>
+                    27 MAR LTP {selectedDataPoint?.ltp || 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className='text-gray-400 text-sm'>
+                    {' '}
+                    {selectedDataPoint?.bidPrice || 'N/A'}
+                  </p>
+                  <p className='text-gray-400 text-sm'>
+                    {' '}
+                    {selectedDataPoint?.askPrice || 'N/A'}
+                  </p>
+                  <p className='text-gray-400 text-sm'>
+                    {selectedDataPoint?.ltq || 'N/A'}
+                  </p>
+                </div>
+              </div>
 
-          {/* Lot Size & Quantity */}
-          <div className="flex justify-between text-gray-300 mb-2 bg-gray-600 p-2">
-            <span>Lot Size: 1000</span>
-            <span>Qty: 1000</span>
-          </div>
+              {/* Lot Size & Quantity */}
+              <div className='flex justify-between bg-gray-600 mb-2 p-2 text-gray-300'>
+                <span>Lot Size: 1000</span>
+                <span>Qty: 1000</span>
+              </div>
 
-          {/* Input Fields */}
-          <div className="flex gap-2 mb-3">
-            <input type="text" value="Market" className="w-1/2 p-2 bg-gray-800 text-white rounded" readOnly />
-            <input type="number" value="1" className="w-1/2 p-2 bg-gray-800 text-white rounded" />
-          </div>
+              {/* Input Fields */}
+              <div className='flex gap-2 mb-3'>
+                <input
+                  type='text'
+                  value='Market'
+                  className='bg-gray-800 p-2 rounded w-1/2 text-white'
+                  readOnly
+                />
+                <input
+                  type='number'
+                  value='1'
+                  className='bg-gray-800 p-2 rounded w-1/2 text-white'
+                />
+              </div>
 
-          {/* Market / Manual Buttons */}
-          <div className="flex gap-2 mb-4">
-            <button className="w-1/2 p-2 border-2 border-blue-900 text-blue-400 rounded">Market</button>
-            <button className="w-1/2 p-2 border-2 border-gray-500 text-gray-300 rounded">Manual</button>
-          </div>
+              {/* Market / Manual Buttons */}
+              <div className='flex gap-2 mb-4'>
+                <button className='p-2 border-2 border-blue-900 rounded w-1/2 text-blue-400'>
+                  Market
+                </button>
+                <button className='p-2 border-2 border-gray-500 rounded w-1/2 text-gray-300'>
+                  Manual
+                </button>
+              </div>
 
-          {/* BUY & SELL Buttons */}
-          <div className="flex gap-4">
-            <button  className="w-1/2 bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded">
-              BUY
-            </button>
-            <button  className="w-1/2 bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded">
-              SELL
-            </button>
+              {/* BUY & SELL Buttons */}
+              <div className='flex gap-4'>
+                <button className='bg-blue-600 hover:bg-blue-800 px-4 py-2 rounded w-1/2 font-bold text-white'>
+                  BUY
+                </button>
+                <button className='bg-red-600 hover:bg-red-800 px-4 py-2 rounded w-1/2 font-bold text-white'>
+                  SELL
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
-    )}
-      </div>
-      
     </div>
   )
 }

@@ -148,7 +148,7 @@ const Page = () => {
     console.log(formData)
     try {
       const response = await fetch(
-        'http://localhost:4000/api/v1/brokerusers',
+        'https://nex-trade-backend.vercel.app/api/v1/brokerusers',
         {
           method: 'POST',
           headers: {
@@ -228,6 +228,7 @@ const Page = () => {
       <option value=''>Select Role</option>
       <option value='User'>User</option>
       <option value='Sub-Broker'>Sub-Broker</option>
+      <option value='Broker'>Broker</option>
     </select>
   </div>
   <div>

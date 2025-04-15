@@ -2,7 +2,8 @@
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -17,7 +18,15 @@ const Navbar = () => {
     { label: "ACCOUNTS", href: "/accounts" },
     { label: "PAYIN-OUT", href: "/payinout" },
   ];
+  const router = useRouter();
 
+  const handleLogout = () => {
+    Cookies.remove('userId');  // Remove user ID
+    Cookies.remove('username'); // Remove username
+    Cookies.remove('role'); // Remove role if needed
+
+    router.push('/login'); // Redirect to login page
+  };
   return (
     <nav className="bg-[#1A2C38] text-white p-4 border-b border-gray-700">
       <div className="container mx-auto">
@@ -79,7 +88,9 @@ const Navbar = () => {
               </Link>
             ))}
           </div>
-          <button className="text-sm hover:text-red-400 transition-colors">
+          <button
+            onClick={handleLogout}
+           className="text-sm hover:text-red-400 transition-colors">
             LOGOUT
           </button>
         </div>
