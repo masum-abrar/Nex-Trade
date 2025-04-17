@@ -28,7 +28,7 @@ export default function LoginPage () {
       setSuccessMessage('');
 
       try {
-        const response = await fetch('https://nex-trade-backend.vercel.app/api/v1/loginbrokerusers', {
+        const response = await fetch('http://localhost:4000/api/v1/loginbrokerusers', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -46,14 +46,15 @@ export default function LoginPage () {
         setErrorMessage('');
 
         // Save user info in cookies
-        Cookies.set('userInfo', JSON.stringify({ userId: loginData.userId, role: data.role , username: data.username, }), { expires: 7 });
+        Cookies.set('userInfo', JSON.stringify({ userId: loginData.userId, role: data.role , username: data.username,  id: data.id, }), { expires: 7 });
 
         // Update state to reflect the stored user info
         setUserInfo({ userId: loginData.userId, role: data.role , username: data.username,  });
 
-        if (data.role === 'User') {
-          window.location.href = '/user-marketwatch';
-        } else if (data.role === 'Sub-Broker') {
+       if (data.role === 'User') {
+  window.location.href = `/user-marketwatch/${data.id}`;
+}
+ else if (data.role === 'Sub-Broker') {
           window.location.href = '/marketwatch';
         }
         else if (data.role === 'Broker') {

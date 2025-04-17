@@ -6,9 +6,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 
 import { FaTrash, FaPlus, FaChartBar, FaShoppingCart, FaBolt, FaCog } from "react-icons/fa";
-import BottomNav from "../BotomNav";
+import BottomNav from "../../BotomNav";
 
-const MarketWatch = () => {
+const MarketWatch = ({ params }) => {
+  const { userId } = params || {};
   const [search, setSearch] = useState("");
   const [info, setData] = useState([])
   const [activeTab, setActiveTab] = useState('BSE-FUT')
@@ -21,10 +22,28 @@ const MarketWatch = () => {
   const [isBrokerage, setIsBrokerage] = useState(false);
   const [isStopLossTarget, setIsStopLossTarget] = useState(false);
   const [orderLots, setOrderLots] = useState(1);
+  const [brokerUser, setBrokerUser] = useState(null);
 const lotSize = 30;
 const calculatedQty = orderLots * lotSize;
 
 
+useEffect(() => {
+  const fetchBrokerUser = async () => {
+    try {
+      const res = await fetch(`http://localhost:4000/api/v1/brokerusers/${userId}`);
+      const data = await res.json();
+      if (data.success) {
+        setBrokerUser(data.user);
+      } else {
+        console.error("User not found");
+      }
+    } catch (error) {
+      console.error("Failed to fetch broker user", error);
+    }
+  };
+
+  fetchBrokerUser();
+}, [userId]);
 
   const handleRowClick = (dataPoint) => {
     setSelectedDataPoint(dataPoint);
@@ -55,7 +74,7 @@ const calculatedQty = orderLots * lotSize;
   };
 
   try {
-    const response = await fetch("https://nex-trade-backend.vercel.app/api/v1/tradeorder", {
+    const response = await fetch("http://localhost:4000/api/v1/tradeorder", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -390,7 +409,8 @@ const calculatedQty = orderLots * lotSize;
   return (
     <div className="bg-[#071824] h-[1200px] text-white flex flex-col"> 
       {/* Funds & Balance Section */}
-      <div className="p-4 border-b border-gray-700 container mx-auto">  
+      <div className="p-4 border-b border-gray-700 container mx-auto"> 
+      {/* {brokerUser && <p>Welcome User ID: {brokerUser.id}</p>}  */}
         <h2 className="text-lg font-semibold">Funds</h2>
         <div className="flex lg:justify-between flex-col mt-2 gap-4 ">
          <div className="flex justify-between">
@@ -537,7 +557,7 @@ const calculatedQty = orderLots * lotSize;
                     </td>
                     <td className='p-2'>
                       <span className='text-green-500'>
-                        {dataPoint.bidPrice || 'N/A'}
+                        {dataPoint.askPrice || 'N/A'}
                       </span>
                     </td>
                     <td className='p-2'>{dataPoint.ltp || 'null'}</td>
@@ -559,7 +579,7 @@ const calculatedQty = orderLots * lotSize;
           </table>
           
         )}
-  {selectedDataPoint && (
+ {selectedDataPoint && (
   <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center">
     <div className="bg-[#151f36] text-white p-6 rounded-lg w-[600px]">
       {/* Header */}
@@ -599,13 +619,12 @@ const calculatedQty = orderLots * lotSize;
       </div>
 
       {/* Lot Size & Quantity */}
-<div className="flex justify-between text-gray-300 mb-2 bg-gray-800 p-3 text-sm">
-  <span>Max Lots : 50</span>
-  <span>Order Lots: 50</span>
-  <span>Lot Size : {lotSize}</span>
-  <span>Qty: {calculatedQty}</span>
-</div>
-
+      <div className="flex justify-between text-gray-300 mb-2 bg-gray-800 p-3 text-sm">
+        <span>Max Lots : 50</span>
+        <span>Order Lots: {orderLots}</span>
+        <span>Lot Size : {lotSize}</span>
+        <span>Qty: {calculatedQty}</span>
+      </div>
 
       {/* Stop Loss / Target Input Fields */}
       {isStopLossTarget && (
@@ -619,42 +638,42 @@ const calculatedQty = orderLots * lotSize;
       <div className="flex gap-2 mb-3">
         <input type="text" value="Market" className="w-1/2 p-2 bg-gray-800 text-white rounded" readOnly />
         <input
-  type="number"
-  value={orderLots}
-  onChange={(e) => setOrderLots(e.target.value)}
-  className="w-1/2 p-2 bg-gray-800 text-white rounded"
-/>
-
+          type="number"
+          value={orderLots}
+          onChange={(e) => setOrderLots(e.target.value)}
+          className="w-1/2 p-2 bg-gray-800 text-white rounded"
+        />
       </div>
 
       {/* Market / Manual Buttons */}
       <div className="flex gap-2 mb-4">
         <button className="w-1/2 p-2 border-2 border-blue-900 text-blue-400 rounded">Market</button>
-       {!isStopLossTarget && (
-         <button className="w-1/2 p-2 border-2 border-gray-500 text-gray-300 rounded">Limit</button>
-       )}
+        {!isStopLossTarget && (
+          <button className="w-1/2 p-2 border-2 border-gray-500 text-gray-300 rounded">Limit</button>
+        )}
       </div>
-      <div className="flex justify-between text-gray-300 mb-2 bg-gray-800 mt-9 mb-5 p-3 text-sm">
-        <span>Margin: 7885</span>
-        <span>Carry: 7881</span>
-        <span>Margin Limit : ₹ 0</span>
-       
 
+      {/* Margin & Carry Calculation */}
+      <div className="flex justify-between text-gray-300 mb-2 bg-gray-800 mt-9 mb-5 p-3 text-sm">
+        <span>Margin: {brokerUser?.mcx_intraday ? (lotSize * selectedDataPoint?.askPrice) / brokerUser.mcx_intraday : 'Loading...'}</span>
+        <span>Carry: {brokerUser?.mcx_intraday ? ((lotSize * selectedDataPoint?.askPrice) / brokerUser.mcx_intraday) * 1.1 : 'Loading...'}</span>
+        <span>Margin Limit : {brokerUser?.mcx_holding ?? 'Loading...'}</span>
       </div>
+
       {/* BUY & SELL Buttons */}
       <div className="flex gap-4">
-      <button onClick={() => handleOrder("BUY")} className="w-1/2 bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded">
-  BUY
-</button>
+        <button onClick={() => handleOrder("BUY")} className="w-1/2 bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded">
+          BUY
+        </button>
 
-<button onClick={() => handleOrder("SELL")} className="w-1/2 bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded">
-  SELL
-</button>
-
+        <button onClick={() => handleOrder("SELL")} className="w-1/2 bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded">
+          SELL
+        </button>
       </div>
     </div>
   </div>
 )}
+
 
       </div>
 

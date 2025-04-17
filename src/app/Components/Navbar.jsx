@@ -23,7 +23,9 @@ const Navbar = () => {
   const handleLogout = () => {
     Cookies.remove('userId');  // Remove user ID
     Cookies.remove('username'); // Remove username
-    Cookies.remove('role'); // Remove role if needed
+    Cookies.remove('role');
+    Cookies.remove('id');
+     // Remove role if needed
 
     router.push('/login'); // Redirect to login page
   };

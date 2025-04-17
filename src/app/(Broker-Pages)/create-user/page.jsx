@@ -1,7 +1,7 @@
 'use client'
 import Navbar from '@/app/Components/Navbar'
 import Sidebar from '@/app/Components/Sidebar'
-import React, { useState } from 'react'
+import React, { useState,useEffect } from 'react'
 
 const ToggleSwitch = ({ label }) => {
   const [enabled, setEnabled] = useState(false)
@@ -29,7 +29,20 @@ const ToggleSwitch = ({ label }) => {
  
 
 const Page = () => {
-  const [formData, setFormData] = useState({})
+  const [formData, setFormData] = useState({
+    mcx_maxExchLots: 20,
+    mcx_commission:200,
+    mcx_maxLots:50,
+    mcx_orderLots:10,
+    mcx_limitPercentage:0,
+    mcx_holding:100,
+    mcxOPTBUY_strike:50,
+    mcxOPTBUY_commission:500,
+    nse_maxExchLots:20,
+    ledgerBalanceClose: 90,
+    mcx_intraday:500
+
+  })
   const [showFields, setShowFields] = useState(false);
   const [showMCXOPTBUY, setShowMCXOPTBUY] = useState(false);
   const [showMcxOptSell, setShowMcxOptSell] = useState(false);
@@ -48,6 +61,10 @@ const Page = () => {
   const [showSTKNSE, setShowSTKNSE] = useState(false);
   const [showSTKEQ, setShowSTKEQ] = useState(false);
   const [showBSEOPTBUY, setShowBSEOPTBUY] = useState(false);
+  const [selectedOption, setSelectedOption] = useState('');
+    const [segments, setSegments] = useState([]);
+  
+    const allOptions = ['NSE', 'MCX', 'CRYPTO', 'FOREX'];
 
   const toggleFields = () => {
     setShowFields(!showFields);
@@ -58,78 +75,70 @@ const Page = () => {
   
     setFormData((prev) => ({
       ...prev,
-      [name]: [
-        "ledgerBalanceClose",
-        "profitTradeHoldMinSec",
-        "lossTradeHoldMinSec",
-        "mcx_maxExchLots",
-        "mcx_commission",
-        "mcx_maxLots",
-        "mcx_orderLots",
-        "mcx_limitPercentage",
-        "mcx_intraday",
-        "mcxOPTBUY_commission",
-        "mcxOPTBUY_strike",
-        "mcxOPTSELL_commission",  // Added for MCX Option Selling
-        "mcxOPTSELL_strike",      // Added for MCX Option Selling
-  
-        // New fields added for MCX Options
-        "mcxOPT_maxLots",          // Max Lots
-        "mcxOPT_orderLots",        // Order Lots
-        "mcxOPT_limitPercentage",  // Limit Percentage
-        "mcxOPT_intraday",         // Intraday
-        "mcxOPT_holding",          // Holding
-  
-        // New fields added for NSE and IDXNSE
-        "nse_maxExchLots",         // NSE Max Exch Lots
-  
-        "idxNSE_commission",       // IDXNSE Commission
-        "idxNSE_maxLots",          // IDXNSE Max Lots
-        "idxNSE_orderLots",        // IDXNSE Order Lots
-        "idxNSE_limitPercentage",  // IDXNSE Limit Percentage
-        "idxNSE_intraday",         // IDXNSE Intraday
-        "idxNSE_holding",          // IDXNSE Holding
-  
-        // New fields for IDXOPTBUY
-        "idxOPTBUY_commission",    // IDXOPTBUY Commission
-        "idxOPTBUY_strike",        // IDXOPTBUY Strike
-       
-        // New fields for IDXOPTSELL
-        "idxOPTSELL_commission",   // IDXOPTSELL Commission
-        "idxOPTSELL_strike",       // IDXOPTSELL Strike
-      
-  
-        // New fields for IDXOPT
-        "idxOPT_maxLots",          // IDXOPT Max Lots
-        "idxOPT_orderLots",        // IDXOPT Order Lots
-        "idxOPT_expiryLossHold",   // IDXOPT Expiry Loss Hold
-        "idxOPT_expiryProfitHold", // IDXOPT Expiry Profit Hold
-        "idxOPT_expiryIntradayMargin", // IDXOPT Expiry Intraday Margin
-        "idxOPT_limitPercentage",  // IDXOPT Limit Percentage
-        "idxOPT_intraday",         // IDXOPT Intraday
-        "idxOPT_holding",          // IDXOPT Holding
-       
-  
-        // New fields for STKOPTBUY
-        "stkOPTBUY_commission",    // STKOPTBUY Commission
-        "stkOPTBUY_strike",        // STKOPTBUY Strike
-
-        //new 1
-        "STKOPTSELL_commission",   // STKOPTSELL Commission
-        "STKOPTSELL_strike",       // STKOPTSELL Strike
-
-        //new 2
-        "STKOPT_maxLots",          // STKOPT Max Lots
-        "STKOPT_orderLots",        // STKOPT Order Lots
-        "STKOPT_limitPercentage",
-        "STKOPT_intraday",
-        "STKOPT_holding",
-      
-      ].includes(name)
-        ? value ? parseInt(value, 10) : null // Convert to integer or set null
-        : ["intradaySquare"].includes(name)
-        ? value === "true" ? true : value === "false" ? false : null // Handle boolean or null
-        : value || null, // Set null if empty
+      [name]:
+        name === 'segmentAllow'
+          ? Array.isArray(value)
+            ? value.join(',')
+            : value
+          : [
+              "ledgerBalanceClose",
+              "profitTradeHoldMinSec",
+              "lossTradeHoldMinSec",
+              "mcx_maxExchLots",
+              "mcx_commission",
+              "mcx_maxLots",
+              "mcx_orderLots",
+              "mcx_limitPercentage",
+              "mcx_intraday",
+              
+              "mcxOPTBUY_commission",
+              "mcxOPTBUY_strike",
+              "mcxOPTSELL_commission",
+              "mcxOPTSELL_strike",
+              "mcxOPT_maxLots",
+              "mcxOPT_orderLots",
+              "mcxOPT_limitPercentage",
+              "mcxOPT_intraday",
+              "mcxOPT_holding",
+              "nse_maxExchLots",
+              "idxNSE_commission",
+              "idxNSE_maxLots",
+              "idxNSE_orderLots",
+              "idxNSE_limitPercentage",
+              "idxNSE_intraday",
+              "idxNSE_holding",
+              "idxOPTBUY_commission",
+              "idxOPTBUY_strike",
+              "idxOPTSELL_commission",
+              "idxOPTSELL_strike",
+              "idxOPT_maxLots",
+              "idxOPT_orderLots",
+              "idxOPT_expiryLossHold",
+              "idxOPT_expiryProfitHold",
+              "idxOPT_expiryIntradayMargin",
+              "idxOPT_limitPercentage",
+              "idxOPT_intraday",
+              "idxOPT_holding",
+              "stkOPTBUY_commission",
+              "stkOPTBUY_strike",
+              "STKOPTSELL_commission",
+              "STKOPTSELL_strike",
+              "STKOPT_maxLots",
+              "STKOPT_orderLots",
+              "STKOPT_limitPercentage",
+              "STKOPT_intraday",
+              "STKOPT_holding",
+            ].includes(name)
+          ? value
+            ? parseInt(value, 10)
+            : null
+          : name === "intradaySquare"
+          ? value === "true"
+            ? true
+            : value === "false"
+            ? false
+            : null
+          : value || null,
     }));
   };
   
@@ -139,8 +148,23 @@ const Page = () => {
   
   
   
+  
   ;
+  const generateUserId = () => {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const randomLetters = letters.charAt(Math.floor(Math.random() * 26)) +
+                          letters.charAt(Math.floor(Math.random() * 26)) +
+                          letters.charAt(Math.floor(Math.random() * 26));
+    const randomNumbers = Math.floor(100 + Math.random() * 900);
+    return randomLetters + randomNumbers;
+  };
+  const [userId, setUserId] = useState('');
 
+  useEffect(() => {
+    const generatedId = generateUserId();
+    setUserId(generatedId);
+    handleChange({ target: { name: 'loginUsrid', value: generatedId } });
+  }, []);
 
   // Handle form submission
   const handleSubmit = async e => {
@@ -148,7 +172,7 @@ const Page = () => {
     console.log(formData)
     try {
       const response = await fetch(
-        'https://nex-trade-backend.vercel.app/api/v1/brokerusers',
+        'http://localhost:4000/api/v1/brokerusers',
         {
           method: 'POST',
           headers: {
@@ -170,6 +194,20 @@ const Page = () => {
       alert('Failed to submit the form.')
     }
   }
+  const handleAdd = () => {
+    if (selectedOption && !segments.includes(selectedOption)) {
+      const newSegments = [...segments, selectedOption];
+      setSegments(newSegments);
+      handleChange({ target: { name: 'segmentAllow', value: newSegments } });
+    }
+  };
+
+  const handleRemove = (segment) => {
+    const newSegments = segments.filter(item => item !== segment);
+    setSegments(newSegments);
+    handleChange({ target: { name: 'segmentAllow', value: newSegments } });
+  };
+  
   return (
     <div className='flex bg-gray-900 h-screen text-white'>
       <Sidebar />
@@ -180,18 +218,19 @@ const Page = () => {
           <div className='gap-6 grid grid-cols-1 md:grid-cols-2'>
             {/* Left Column */}
             <form className='space-y-4' onSubmit={handleSubmit}>
-  <div>
-    <label className='block font-medium text-gray-300 text-sm'>
-      LOGIN USERID
-    </label>
-    <input
-      type='text'
-      name='loginUsrid'
-      placeholder='XYB294'
-      onChange={handleChange}
-      className='block bg-gray-800 mt-1 p-4 border-gray-700 rounded-md w-full text-white'
-    />
-  </div>
+            <div>
+      <label className='block font-medium text-gray-300 text-sm'>
+        LOGIN USERID
+      </label>
+      <input
+        type='text'
+        name='loginUsrid'
+        value={userId}
+        readOnly
+        className='block bg-gray-800 mt-1 p-4 border-gray-700 rounded-md w-full text-white'
+      />
+    </div>
+    <p className='text-green-400'>User ID is available.</p>
   <div>
     <label className='block font-medium text-gray-300 text-sm'>
       Username
@@ -246,24 +285,47 @@ const Page = () => {
     </select>
   </div>
   <div>
-    <label className='block font-medium text-gray-300 text-sm'>
-      Segment Allow
-    </label>
-    <span className='text-gray-400 text-xs'>
-      Select the segment you want to allow user
-    </span>
-    <select
-      onChange={handleChange}
-      name='segmentAllow'
-      className='block bg-gray-800 shadow-sm mt-1 p-4 border-gray-700 focus:border-indigo-500 rounded-md focus:ring-indigo-500 w-full text-white'
-    >
-      <option value=''>Select Segment</option>
-      <option>NSE</option>
-      <option>MCX</option>
-      <option>CRYPTO</option>
-      <option>FOREX</option>
-    </select>
-  </div>
+      <label className='block font-medium text-gray-300 text-sm'>
+        Segment Allow
+      </label>
+      <span className='text-gray-400 text-xs'>
+        Select the segment you want to allow user
+      </span>
+
+      <select
+        value={selectedOption}
+        onChange={(e) => setSelectedOption(e.target.value)}
+        className='block bg-gray-800 shadow-sm mt-1 p-3 border-gray-700 focus:border-indigo-500 rounded-md focus:ring-indigo-500 w-full text-white'
+      >
+        <option value=''>Select an option</option>
+        {allOptions.map((option) => (
+          <option key={option} value={option}>{option}</option>
+        ))}
+      </select>
+
+      <button
+        type='button'
+        onClick={handleAdd}
+        className='mt-3 w-full bg-gray-700 text-white py-2 rounded-md hover:bg-gray-600 transition'
+      >
+        Add
+      </button>
+
+      <div className='mt-4 space-y-2'>
+        {segments.map((segment) => (
+          <div key={segment} className='flex items-center justify-between bg-gray-900 px-4 py-2 rounded-md'>
+            <span className='text-white'>{segment}</span>
+            <button
+              type='button'
+              onClick={() => handleRemove(segment)}
+              className='bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded-md text-sm'
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
   <div>
     <label className='block font-medium text-gray-300 text-sm'>
       Intraday Square
@@ -498,7 +560,7 @@ const Page = () => {
                 className="block bg-gray-800 mt-1 p-3 border border-gray-700 rounded-md w-full text-white"
               />
             </div>
-
+          
             {/* MCXOPTBUY Strike */}
             <div className="mb-4">
               <label className="block font-medium text-gray-300 text-sm">

@@ -1,9 +1,11 @@
 'use client'
-import toast from "react-hot-toast";
+
 import Navbar from "../../Components/Navbar";
 import Sidebar from "../../Components/Sidebar";
 import { useEffect, useState } from "react";
-
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 const OrdersPage = () => {
   const [orders, setOrders] = useState([]);
@@ -15,8 +17,8 @@ const OrdersPage = () => {
       setLoading(true);
       try {
         const endpoint = activeTab === "executed" 
-          ? "https://nex-trade-backend.vercel.app/api/v1/executed-orders"
-          : "https://nex-trade-backend.vercel.app/api/v1/limit-orders";
+          ? "http://localhost:4000/api/v1/executed-orders"
+          : "http://localhost:4000/api/v1/limit-orders";
         
         const response = await fetch(endpoint);
         const result = await response.json();
@@ -38,7 +40,7 @@ const OrdersPage = () => {
 
   const handleDelete = async (orderId) => {
     try {
-      const response = await fetch(`https://nex-trade-backend.vercel.app/api/v1/delete-order/${orderId}`, {
+      const response = await fetch(`http://localhost:4000/api/v1/delete-order/${orderId}`, {
         method: "DELETE",
       });
   
@@ -124,6 +126,7 @@ const OrdersPage = () => {
           </div>
         </div>
       </div>
+       <ToastContainer />
     </div>
   );
 };

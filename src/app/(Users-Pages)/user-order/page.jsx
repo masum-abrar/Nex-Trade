@@ -12,7 +12,7 @@ const Page = () => {
     useEffect(() => {
       const fetchExecutedOrders = async () => {
         try {
-          const response = await fetch("https://nex-trade-backend.vercel.app/api/v1/executed-orders");
+          const response = await fetch("http://localhost:4000/api/v1/executed-orders");
           const result = await response.json();
           if (result.success) {
             setOrders(result.orders);
@@ -24,7 +24,7 @@ const Page = () => {
         }
       };
   
-      if (activeTab === "Executed") {
+      if (activeTab === "Executed" || activeTab === "Open") {
         fetchExecutedOrders();
       }
     }, [activeTab]);
@@ -93,45 +93,102 @@ const Page = () => {
 
       {/* Tab Content */}
       <div className="mt-4 text-white p-4 ">
-        {activeTab === "Open" &&
-        
-        <p>Showing Closed Orders...</p>}
-scriptName
-{activeTab === "Executed" && (
+      {activeTab === "Open" && (
   <div>
     {orders.length > 0 ? (
-      orders.map((order) => (
-        <div key={order.id} className="bg-gray-800 text-white p-4 rounded-lg mb-2 flex justify-between items-center">
-          
-          {/* Left Side: Order Type, Qty, Script Name */}
-          <div className="flex flex-col">
-            <span className={`text-lg font-bold ${order.orderType === "BUY" ? "text-green-400" : "text-red-400"}`}>
-              {order.orderType}
-            </span>
-            <p className="text-gray-300 text-sm">Qty: {order.quantity}</p>
-            <h3 className="text-lg font-semibold ">
-  {order.scriptName}
-</h3>
+      orders.map((order) => {
+        // Randomly simulate profit or loss for each order
+        const randomPL = (Math.random() * 2 - 1) * order.quantity * 10; // Simulating P/L based on quantity and random fluctuation
+        const plStatus = randomPL >= 0 ? "Profit" : "Loss";
+        
+        return (
+          <div key={order.id} className="bg-gray-800 text-white p-4 rounded-lg mb-2 flex justify-between items-center">
+            {/* Left Side: Order Type, Qty, Script Name */}
+            <div className="flex flex-col">
+              <span className={`text-lg font-bold ${order.orderType === "BUY" ? "text-green-400" : "text-red-400"}`}>
+                {order.orderType}
+              </span>
+              <p className="text-gray-300 text-sm">Qty: {order.quantity}</p>
+              <h3 className="text-lg font-semibold">
+                {order.scriptName}
+              </h3>
+            </div>
 
+            {/* Right Side: Time, Status, Order Type */}
+            <div className="flex flex-col text-right">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-400 text-sm">{new Date(order.createdAt).toLocaleTimeString()}</span>
+                <span className="text-green-600 font-semibold">EXECUTED</span>
+              </div>
+              <span className="text-gray-400">{order.ltp}</span>
+              
+              <span className="text-gray-400">{order.priceType}</span>
+            </div>
+
+            {/* Display P/L */}
+            {/* <div className="text-right mt-2">
+              <span className={`text-lg font-bold ${plStatus === "Profit" ? "text-green-400" : "text-red-400"}`}>
+                {plStatus}: {randomPL.toFixed(2)}
+              </span>
+            </div> */}
           </div>
-
-          {/* Right Side: Time, Status, Order Type */}
-          <div className="flex flex-col text-right">
-    <div className="flex items-center gap-2">
-      <span className="text-gray-400 text-sm">{new Date(order.createdAt).toLocaleTimeString()}</span>
-      <span className="text-green-600 font-semibold">EXECUTED</span>
-    </div>
-    <span className="text-gray-400">{order.ltp}</span>
-    <span className="text-gray-400">{order.priceType}</span>
-  </div>
-
-        </div>
-      ))
+        );
+      })
     ) : (
       <p className="text-gray-400">No executed orders found.</p>
     )}
   </div>
 )}
+
+{activeTab === "Executed" && (
+  <div>
+    {orders.length > 0 ? (
+      orders.map((order) => {
+        // Randomly simulate profit or loss for each order
+        const randomPL = (Math.random() * 2 - 1) * order.quantity * 10; // Simulating P/L based on quantity and random fluctuation
+        const plStatus = randomPL >= 0 ? "Profit" : "Loss";
+        
+        return (
+          <div key={order.id} className="bg-gray-800 text-white p-4 rounded-lg mb-2 flex justify-between items-center">
+            {/* Left Side: Order Type, Qty, Script Name */}
+            <div className="flex flex-col">
+              <span className={`text-lg font-bold ${order.orderType === "BUY" ? "text-green-400" : "text-red-400"}`}>
+                {order.orderType}
+              </span>
+              <p className="text-gray-300 text-sm">Qty: {order.quantity}</p>
+              <h3 className="text-lg font-semibold">
+                {order.scriptName}
+              </h3>
+            </div>
+
+            {/* Right Side: Time, Status, Order Type */}
+            <div className="flex flex-col text-right">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-400 text-sm">{new Date(order.createdAt).toLocaleTimeString()}</span>
+                <span className="text-green-600 font-semibold">EXECUTED</span>
+              </div>
+              <span className="text-gray-400">{order.ltp}</span>
+              <span className={`text-lg font-bold ${plStatus === "Profit" ? "text-green-400" : "text-red-400"}`}>
+                {plStatus}: {randomPL.toFixed(2)}
+              </span>
+              <span className="text-gray-400">{order.priceType}</span>
+            </div>
+
+            {/* Display P/L */}
+            {/* <div className="text-right mt-2">
+              <span className={`text-lg font-bold ${plStatus === "Profit" ? "text-green-400" : "text-red-400"}`}>
+                {plStatus}: {randomPL.toFixed(2)}
+              </span>
+            </div> */}
+          </div>
+        );
+      })
+    ) : (
+      <p className="text-gray-400">No executed orders found.</p>
+    )}
+  </div>
+)}
+
 
 
 

@@ -62,9 +62,11 @@ const page = () => {
         <div className="space-y-2">
           <h1 className="font-bold">Margin Available</h1>
           <p className="text-2xl">₹0</p>
+          <Link href={"/withdraw"}>
           <button className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
             Withdraw
           </button>
+          </Link>
          <Link href={"/deposite"}>
          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition ml-4">
             Deposit
