@@ -1,396 +1,529 @@
-'use client'
-import Navbar from '@/app/Components/Navbar'
-import Sidebar from '@/app/Components/Sidebar'
-import React, { useState,useEffect } from 'react'
+'use client';
+import { useEffect, useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import Navbar from '../../../Components/Navbar';
+import Sidebar from '../../../Components/Sidebar';
 
-const ToggleSwitch = ({ label }) => {
-  const [enabled, setEnabled] = useState(false)
-  return (
-    <div className='flex justify-between items-center w-full max-w-xs'>
-      <span className='text-gray-300 text-sm'>{label}</span>
-      <button
-        className={`relative w-12 h-6 flex items-center bg-gray-800 rounded-full p-1 transition ${
-          enabled ? 'bg-indigo-600' : 'bg-gray-700'
-        }`}
-        onClick={() => setEnabled(!enabled)}
-      >
-        <div
-          className={`w-4 h-4 bg-gray-300 rounded-full shadow-md transform transition ${
-            enabled ? 'translate-x-6' : 'translate-x-0'
-          }`}
-        ></div>
-      </button>
-    </div>
-  )
-}
-
-  
-
- 
-
-const Page = () => {
-  const [formData, setFormData] = useState({
-    mcx_maxExchLots: 20,
-    mcx_commission:200,
-    mcx_maxLots:50,
-    mcx_orderLots:10,
-    mcx_limitPercentage:0,
-    mcx_holding:100,
-    mcxOPTBUY_strike:50,
-    mcxOPTBUY_commission:500,
-    nse_maxExchLots:20,
-    ledgerBalanceClose: 90,
-    mcx_intraday:500
-
-  })
-  const [showFields, setShowFields] = useState(false);
-  const [showMCXOPTBUY, setShowMCXOPTBUY] = useState(false);
-  const [showMcxOptSell, setShowMcxOptSell] = useState(false);
-  const [showMCXOPT, setShowMCXOPT] = useState(false);
-  const [showNSE, setShowNSE] = useState(false);
-  const [showIDXNSE, setShowIDXNSE] = useState(false);
-  // NEW
-  const [showIDXOPTBUY, setShowIDXOPTBUY] = useState(false);
-  const [showIDXOPTSELL, setShowIDXOPTSELL] = useState(false);
-  const [showIDXOPT, setShowIDXOPT] = useState(false);
-  const [showSTKOPTBUY, setShowSTKOPTBUY] = useState(false);
-
-  //new
-  const [showSTKOPTSELL, setShowSTKOPTSELL] = useState(true); // Default show STKOPTSELL
-  const [showSTKOPT, setShowSTKOPT] = useState(false);
-  const [showSTKNSE, setShowSTKNSE] = useState(false);
-  const [showSTKEQ, setShowSTKEQ] = useState(false);
-  const [showBSEOPTBUY, setShowBSEOPTBUY] = useState(false);
+const UpdatePage = () => {
+  const router = useRouter();
+  const params = useParams();
+  const id = params?.id;
   const [selectedOption, setSelectedOption] = useState('');
-    const [segments, setSegments] = useState([]);
+  const [user, setUser] = useState(null);
+  const [segments, setSegments] = useState([]);
+  const [showMCXOPTBUY, setShowMCXOPTBUY] = useState(false);
+    const [showMcxOptSell, setShowMcxOptSell] = useState(false);
+    const [showMCXOPT, setShowMCXOPT] = useState(false);
+   const [showFields, setShowFields] = useState(false);
+   
+      const [showNSE, setShowNSE] = useState(false);
+       const [showIDXNSE, setShowIDXNSE] = useState(false);
+       // NEW
+       const [showIDXOPTBUY, setShowIDXOPTBUY] = useState(false);
+       const [showIDXOPTSELL, setShowIDXOPTSELL] = useState(false);
+       const [showIDXOPT, setShowIDXOPT] = useState(false);
+       const [showSTKOPTBUY, setShowSTKOPTBUY] = useState(false);
+     
+       //new
+       const [showSTKOPTSELL, setShowSTKOPTSELL] = useState(true); // Default show STKOPTSELL
+       const [showSTKOPT, setShowSTKOPT] = useState(false);
+  const allOptions = ['NSE', 'BSE', 'MCX', 'CDS', 'FO']; // or fetch from API
   
-    const allOptions = ['NSE', 'MCX', 'BSE', 'CRYPTO', 'FOREX'];
+  const [formData, setFormData] = useState({
+    loginUsrid: '',
+    username: '',
+    password: '',
+    role: '',
+    marginType: '',
+    intradaySquare: '',
+    ledgerBalanceClose: '',
+    profitTradeHoldMinSec: '',
+    lossTradeHoldMinSec: '',
+    segments: [],
+    // MCX fields
+  mcx_maxExchLots: '',
+  mcx_commissionType: '',
+  mcx_commission: '',
+  mcx_maxLots: '',
+  mcx_orderLots: '',
+  mcx_limitPercentage: '',
+  mcx_intraday: '',
+  mcx_holding: '',
 
-  const toggleFields = () => {
-    setShowFields(!showFields);
-  };
-  // Handle input changes
+  mcxOPTBUY_commissionType: "",
+  mcxOPTBUY_commission: "",
+  mcxOPTBUY_strike: "",
+  mcxOPTBUY_allow: "",
+
+  mcxOPTSELL_commissionType: "",
+  mcxOPTSELL_commission: "",
+  mcxOPTSELL_strike: "",
+  mcxOPTSELL_allow: "",
+
+  nse_maxExchLots: "",
+  idxNSE_commissionType: "",
+  idxNSE_commission: "",
+  idxNSE_maxLots: "",
+  idxNSE_orderLots: "",
+  idxNSE_limitPercentage: "",
+  idxNSE_intraday: "",
+  idxNSE_holding: "",
+
+  // New fields for IDXOPTBUY
+  idxOPTBUY_commissionType: "",
+  idxOPTBUY_commission: "",
+  idxOPTBUY_strike: "",
+  idxOPTBUY_allow: "",
+
+  // New fields for IDXOPTSELL
+  idxOPTSELL_commissionType: "",
+  idxOPTSELL_commission: "",
+  idxOPTSELL_strike: "",
+  idxOPTSELL_allow: "",
+
+  // New fields for IDXOPT
+  idxOPT_maxLots: "",
+  idxOPT_orderLots: "",
+  idxOPT_expiryLossHold: "",
+  idxOPT_expiryProfitHold: "",
+  idxOPT_expiryIntradayMargin: "",
+  idxOPT_limitPercentage: "",
+  idxOPT_intraday: "",
+  idxOPT_holding: "",
+  idxOPT_sellingOvernight: "",
+
+  // New fields for STKOPTBUY
+  stkOPTBUY_commissionType: "",
+  stkOPTBUY_commission: "",
+  stkOPTBUY_strike: "",
+  stkOPTBUY_allow: "",
+
+  STKOPTSELL_commissionType: "",
+  STKOPTSELL_commission: "",
+  STKOPTSELL_strike: "",
+  STKOPTSELL_allow: "",
+
+  //Added for STKOP
+
+  STKOPT_maxLots: "",
+  STKOPT_orderLots: "",
+  STKOPT_limitPercentage: "",
+  STKOPT_intraday: "",
+  STKOPT_holding: "",
+  STKOPT_sellingOvernight: "" 
+  });
+  
+  useEffect(() => {
+    if (user?.segmentAllow) {
+      const initialSegments = typeof user.segmentAllow === "string"
+        ? user.segmentAllow.split(",")
+        : user.segmentAllow;
+  
+      setSegments(initialSegments);
+    }
+  }, [user]);
+  
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch(`http://localhost:4000/api/v1/brokerusers/${id}`);
+        const data = await res.json();
+  
+        if (data.success && data.user) {
+          const user = data.user;
+  
+          setFormData({
+            loginUsrid: user.id?.toString() || '',
+            username: user.username || '',
+            password: user.password || '',
+            role: user.role || '',
+            marginType: user.marginType || '',
+            intradaySquare: user.intradaySquare?.toString() || '',
+            ledgerBalanceClose: user.ledgerBalanceClose || '',
+            profitTradeHoldMinSec: user.profitTradeHoldMinSec || '',
+            lossTradeHoldMinSec: user.lossTradeHoldMinSec || '',
+            segments: user.segmentAllow || [],
+          
+            mcx_maxExchLots: user.mcx_maxExchLots || '',
+            mcx_commissionType: user.mcx_commissionType || '',
+            mcx_commission: user.mcx_commission || '',
+            mcx_maxLots: user.mcx_maxLots || '',
+            mcx_orderLots: user.mcx_orderLots || '',
+            mcx_limitPercentage: user.mcx_limitPercentage || '',
+            mcx_intraday: user.mcx_intraday || '',
+            mcx_holding: user.mcx_holding || '',
+          
+            mcxOPTBUY_commissionType: user.mcxOPTBUY_commissionType || '',
+            mcxOPTBUY_commission: user.mcxOPTBUY_commission || '',
+            mcxOPTBUY_strike: user.mcxOPTBUY_strike || '',
+            mcxOPTBUY_allow: user.mcxOPTBUY_allow || '',
+          
+            mcxOPTSELL_commissionType: user.mcxOPTSELL_commissionType || '',
+            mcxOPTSELL_commission: user.mcxOPTSELL_commission || '',
+            mcxOPTSELL_strike: user.mcxOPTSELL_strike || '',
+            mcxOPTSELL_allow: user.mcxOPTSELL_allow || '',
+          
+            // NSE fields
+            nse_maxExchLots: user.nse_maxExchLots || '',
+          
+            // IDXNSE fields
+            idxNSE_commissionType: user.idxNSE_commissionType || '',
+            idxNSE_commission: user.idxNSE_commission || '',
+            idxNSE_maxLots: user.idxNSE_maxLots || '',
+            idxNSE_orderLots: user.idxNSE_orderLots || '',
+            idxNSE_limitPercentage: user.idxNSE_limitPercentage || '',
+            idxNSE_intraday: user.idxNSE_intraday || '',
+            idxNSE_holding: user.idxNSE_holding || '',
+          
+            // IDXOPTBUY
+            idxOPTBUY_commissionType: user.idxOPTBUY_commissionType || '',
+            idxOPTBUY_commission: user.idxOPTBUY_commission || '',
+            idxOPTBUY_strike: user.idxOPTBUY_strike || '',
+            idxOPTBUY_allow: user.idxOPTBUY_allow || '',
+          
+            // IDXOPTSELL
+            idxOPTSELL_commissionType: user.idxOPTSELL_commissionType || '',
+            idxOPTSELL_commission: user.idxOPTSELL_commission || '',
+            idxOPTSELL_strike: user.idxOPTSELL_strike || '',
+            idxOPTSELL_allow: user.idxOPTSELL_allow || '',
+          
+            // IDXOPT
+            idxOPT_maxLots: user.idxOPT_maxLots || '',
+            idxOPT_orderLots: user.idxOPT_orderLots || '',
+            idxOPT_expiryLossHold: user.idxOPT_expiryLossHold || '',
+            idxOPT_expiryProfitHold: user.idxOPT_expiryProfitHold || '',
+            idxOPT_expiryIntradayMargin: user.idxOPT_expiryIntradayMargin || '',
+            idxOPT_limitPercentage: user.idxOPT_limitPercentage || '',
+            idxOPT_intraday: user.idxOPT_intraday || '',
+            idxOPT_holding: user.idxOPT_holding || '',
+            idxOPT_sellingOvernight: user.idxOPT_sellingOvernight || '',
+          
+            // STKOPTBUY
+            stkOPTBUY_commissionType: user.stkOPTBUY_commissionType || '',
+            stkOPTBUY_commission: user.stkOPTBUY_commission || '',
+            stkOPTBUY_strike: user.stkOPTBUY_strike || '',
+            stkOPTBUY_allow: user.stkOPTBUY_allow || '',
+
+            // STKOPTSELL
+STKOPTSELL_commissionType: user.STKOPTSELL_commissionType || '',
+STKOPTSELL_commission: user.STKOPTSELL_commission || '',
+STKOPTSELL_strike: user.STKOPTSELL_strike || '',
+STKOPTSELL_allow: user.STKOPTSELL_allow || '',
+
+// STKOPT
+STKOPT_maxLots: user.STKOPT_maxLots || '',
+STKOPT_orderLots: user.STKOPT_orderLots || '',
+STKOPT_limitPercentage: user.STKOPT_limitPercentage || '',
+STKOPT_intraday: user.STKOPT_intraday || '',
+STKOPT_holding: user.STKOPT_holding || '',
+STKOPT_sellingOvernight: user.STKOPT_sellingOvernight || '',
+
+          });
+          
+  
+          setSegments(user.segments || []);
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+  
+    if (id) fetchUser();
+  }, [id]);
+  
+  
+  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
   
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name === 'segmentAllow'
-          ? Array.isArray(value)
-            ? value.join(',')
-            : value
-          : [
-              "ledgerBalanceClose",
-              "profitTradeHoldMinSec",
-              "lossTradeHoldMinSec",
-              "mcx_maxExchLots",
-              "mcx_commission",
-              "mcx_maxLots",
-              "mcx_orderLots",
-              "mcx_limitPercentage",
-              "mcx_intraday",
-              
-              "mcxOPTBUY_commission",
-              "mcxOPTBUY_strike",
-              "mcxOPTSELL_commission",
-              "mcxOPTSELL_strike",
-              "mcxOPT_maxLots",
-              "mcxOPT_orderLots",
-              "mcxOPT_limitPercentage",
-              "mcxOPT_intraday",
-              "mcxOPT_holding",
-              "nse_maxExchLots",
-              "idxNSE_commission",
-              "idxNSE_maxLots",
-              "idxNSE_orderLots",
-              "idxNSE_limitPercentage",
-              "idxNSE_intraday",
-              "idxNSE_holding",
-              "idxOPTBUY_commission",
-              "idxOPTBUY_strike",
-              "idxOPTSELL_commission",
-              "idxOPTSELL_strike",
-              "idxOPT_maxLots",
-              "idxOPT_orderLots",
-              "idxOPT_expiryLossHold",
-              "idxOPT_expiryProfitHold",
-              "idxOPT_expiryIntradayMargin",
-              "idxOPT_limitPercentage",
-              "idxOPT_intraday",
-              "idxOPT_holding",
-              "stkOPTBUY_commission",
-              "stkOPTBUY_strike",
-              "STKOPTSELL_commission",
-              "STKOPTSELL_strike",
-              "STKOPT_maxLots",
-              "STKOPT_orderLots",
-              "STKOPT_limitPercentage",
-              "STKOPT_intraday",
-              "STKOPT_holding",
-            ].includes(name)
-          ? value
-            ? parseInt(value, 10)
-            : null
-          : name === "intradaySquare"
-          ? value === "true"
-            ? true
-            : value === "false"
-            ? false
-            : null
-          : value || null,
+      [name]: [
+        "ledgerBalanceClose",
+        "profitTradeHoldMinSec",
+        "lossTradeHoldMinSec",
+        "mcx_maxExchLots",
+        "mcx_commission",
+        "mcx_maxLots",
+        "mcx_orderLots",
+        "mcx_limitPercentage",
+        "mcx_intraday",
+        "mcxOPTBUY_commission",
+        "mcxOPTBUY_strike",
+        "mcxOPTSELL_commission",
+        "mcxOPTSELL_strike",
+        "nse_maxExchLots",
+        "idxNSE_commission",
+        "idxNSE_maxLots",
+        "idxNSE_orderLots",
+        "idxNSE_limitPercentage",
+        "idxNSE_intraday",
+        "idxNSE_holding",
+        "idxOPTBUY_commission",
+        "idxOPTBUY_strike",
+        "idxOPTSELL_commission",
+        "idxOPTSELL_strike",
+        "idxOPT_maxLots",
+        "idxOPT_orderLots",
+        "idxOPT_expiryLossHold",
+        "idxOPT_expiryProfitHold",
+        "idxOPT_expiryIntradayMargin",
+        "idxOPT_limitPercentage",
+        "idxOPT_intraday",
+        "idxOPT_holding",
+        "stkOPTBUY_commission",
+        "stkOPTBUY_strike",
+
+        "STKOPTSELL_commission",
+        "STKOPTSELL_strike",
+        "STKOPT_maxLots",
+        "STKOPT_orderLots",
+        "STKOPT_limitPercentage",
+        "STKOPT_intraday",
+        "STKOPT_holding",
+      ].includes(name)
+        ? value === "" ? "" : parseInt(value, 10)
+        : name === "intradaySquare"
+        ? value === "true"
+          ? true
+          : value === "false"
+          ? false
+          : null
+        : value,
     }));
   };
   
   
-  
-  
-  
-  
-  
-  
-  ;
-  const generateUserId = () => {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const randomLetters = letters.charAt(Math.floor(Math.random() * 26)) +
-                          letters.charAt(Math.floor(Math.random() * 26)) +
-                          letters.charAt(Math.floor(Math.random() * 26));
-    const randomNumbers = Math.floor(100 + Math.random() * 900);
-    return randomLetters + randomNumbers;
-  };
-  const [userId, setUserId] = useState('');
-
-  useEffect(() => {
-    const generatedId = generateUserId();
-    setUserId(generatedId);
-    handleChange({ target: { name: 'loginUsrid', value: generatedId } });
-  }, []);
-
-  // Handle form submission
-  const handleSubmit = async e => {
-    e.preventDefault()
-    console.log(formData)
-    try {
-      const response = await fetch(
-        'http://localhost:4000/api/v1/brokerusers',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(formData)
-        }
-      )
-
-      const data = await response.json()
-
-      if (response.ok) {
-        alert('Form submitted successfully!')
-      } else {
-        alert(`Error: ${data.message}`)
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error)
-      alert('Failed to submit the form.')
-    }
-  }
   const handleAdd = () => {
     if (selectedOption && !segments.includes(selectedOption)) {
       const newSegments = [...segments, selectedOption];
       setSegments(newSegments);
-      handleChange({ target: { name: 'segmentAllow', value: newSegments } });
+      setFormData((prev) => ({ ...prev, segments: newSegments }));
+      setSelectedOption('');
     }
   };
 
+  
   const handleRemove = (segment) => {
-    const newSegments = segments.filter(item => item !== segment);
-    setSegments(newSegments);
-    handleChange({ target: { name: 'segmentAllow', value: newSegments } });
+    const updated = segments.filter((s) => s !== segment);
+    setSegments(updated);
+    setFormData((prev) => ({ ...prev, segments: updated }));
+  };
+    
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    // Convert required fields to integer
+    const finalFormData = {
+      ...formData,
+      profitTradeHoldMinSec: parseInt(formData.profitTradeHoldMinSec, 10) || 0,
+      lossTradeHoldMinSec: parseInt(formData.lossTradeHoldMinSec, 10) || 0,
+      ledgerBalanceClose: parseInt(formData.ledgerBalanceClose, 10) || 0,
+      intradaySquare: formData.intradaySquare === "true" ? true : false,
+      segmentAllow: segments.join(','), // for backend compatibility
+    };
+  
+    try {
+      const res = await fetch(`http://localhost:4000/api/v1/brokerusers/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(finalFormData),
+      });
+  
+      const result = await res.json();
+      if (result.success) {
+        alert('User updated successfully!');
+        router.push('/dashboard');
+      } else {
+        alert('Update failed!');
+      }
+    } catch (err) {
+      console.error('Update failed:', err);
+      alert('Update failed!');
+    }
   };
   
+  
+
   return (
-    <div className='flex bg-gray-900 h-screen text-white'>
-      <Sidebar />
-      <div className='flex-1 overflow-y-auto'>
-        <Navbar />
-        <div className='p-8'>
-          <h2 className='mb-6 font-semibold text-2xl'>New User Settings</h2>
-          <div className='gap-6 grid grid-cols-1 md:grid-cols-2'>
-            {/* Left Column */}
-            <form className='space-y-4' onSubmit={handleSubmit}>
-            <div>
-      <label className='block font-medium text-gray-300 text-sm'>
-        LOGIN USERID
-      </label>
-      <input
-        type='text'
-        name='loginUsrid'
-        value={userId}
-        readOnly
-        className='block bg-gray-800 mt-1 p-4 border-gray-700 rounded-md w-full text-white'
-      />
-    </div>
-    <p className='text-green-400'>User ID is available.</p>
+    <div className='flex'>
+       <Sidebar />
+       <div className='flex-1 bg-[#071824] min-h-screen text-white'>
+      <Navbar />
+     
+      <form className="space-y-4 p-6" onSubmit={handleSubmit}>
+  {/* LOGIN USERID */}
   <div>
-    <label className='block font-medium text-gray-300 text-sm'>
-      Username
-    </label>
+    <label className="block text-sm font-medium text-white">LOGIN USERID</label>
     <input
-      type='text'
-      name='username'
-      placeholder='Username'
-      onChange={handleChange}
-      className='block bg-gray-800 mt-1 p-4 border-gray-700 rounded-md w-full text-white'
+      name="loginUsrid"
+      value={formData.loginUsrid}
+      readOnly
+      className="bg-gray-800 text-white p-3 rounded-md w-full"
     />
   </div>
+
+  {/* Username */}
   <div>
-    <label className='block font-medium text-gray-300 text-sm'>
-      Password
-    </label>
+    <label className="block text-sm font-medium text-white">Username</label>
     <input
-      type='password'
-      name='password'
-      placeholder='Password'
+      name="username"
+      value={formData.username}
       onChange={handleChange}
-      className='block bg-gray-800 mt-1 p-4 border-gray-700 rounded-md w-full text-white'
+      placeholder="Username"
+      className="bg-gray-800 text-white p-3 rounded-md w-full"
     />
   </div>
+
+  {/* Password */}
   <div>
-    <label className='block font-medium text-gray-300 text-sm'>
-      Role
-    </label>
-    <select
-      name='role'
+    <label className="block text-sm font-medium text-white">Password</label>
+    <input
+      type="password"
+      name="password"
+      value={formData.password}
       onChange={handleChange}
-      className='block bg-gray-800 mt-1 p-4 border-gray-700 rounded-md w-full text-white'
+      placeholder="Password"
+      className="bg-gray-800 text-white p-3 rounded-md w-full"
+    />
+  </div>
+
+  {/* Role */}
+  <div>
+    <label className="block text-sm font-medium text-white">Role</label>
+    <select
+      name="role"
+      value={formData.role}
+      onChange={handleChange}
+      className="bg-gray-800 text-white p-3 rounded-md w-full"
     >
-      <option value=''>Select Role</option>
-      <option value='User'>User</option>
-      <option value='Sub-Broker'>Sub-Broker</option>
-      <option value='Broker'>Broker</option>
+      <option value="">Select Role</option>
+      <option value="User">User</option>
+      <option value="Sub-Broker">Sub-Broker</option>
+      <option value="Broker">Broker</option>
     </select>
   </div>
+
+  {/* Margin Type */}
   <div>
-    <label className='block font-medium text-gray-300 text-sm'>
-      Margin Type
-    </label>
+    <label className="block text-sm font-medium text-white">Margin Type</label>
     <select
+      name="marginType"
+      value={formData.marginType}
       onChange={handleChange}
-      name='marginType'
-      className='block bg-gray-800 shadow-sm mt-1 p-4 border-gray-700 focus:border-indigo-500 rounded-md focus:ring-indigo-500 w-full text-white'
+      className="bg-gray-800 text-white p-3 rounded-md w-full"
     >
-      <option value=''>Select Margin Type</option>
-      <option>Credit</option>
-      <option>Exposure</option>
+      <option value="">Select Margin Type</option>
+      <option value="Credit">Credit</option>
+      <option value="Exposure">Exposure</option>
     </select>
   </div>
+
+  {/* Segment Allow */}
   <div>
-      <label className='block font-medium text-gray-300 text-sm'>
-        Segment Allow
-      </label>
-      <span className='text-gray-400 text-xs'>
-        Select the segment you want to allow user
-      </span>
-
-      <select
-        value={selectedOption}
-        onChange={(e) => setSelectedOption(e.target.value)}
-        className='block bg-gray-800 shadow-sm mt-1 p-3 border-gray-700 focus:border-indigo-500 rounded-md focus:ring-indigo-500 w-full text-white'
-      >
-        <option value=''>Select an option</option>
-        {allOptions.map((option) => (
-          <option key={option} value={option}>{option}</option>
-        ))}
-      </select>
-
+    <label className="block text-sm font-medium text-white">Segment Allow</label>
+    <span className="text-gray-400 text-xs">Select the segment you want to allow user</span>
+    <select
+      value={selectedOption}
+      onChange={(e) => setSelectedOption(e.target.value)}
+      className="bg-gray-800 text-white p-3 rounded-md w-full mt-1"
+    >
+      <option value="">Select an option</option>
+      {allOptions.map((option) => (
+        <option key={option} value={option}>{option}</option>
+      ))}
+    </select>
+    <button
+      type="button"
+      onClick={handleAdd}
+      className="mt-3 w-full bg-gray-700 text-white py-2 rounded-md hover:bg-gray-600 transition"
+    >
+      Add
+    </button>
+    <div className="mt-4 space-y-2">
+  {segments.map((segment) => (
+    <div key={segment} className="flex items-center justify-between bg-gray-900 px-4 py-2 rounded-md">
+      <span className="text-white">{segment}</span>
       <button
-        type='button'
-        onClick={handleAdd}
-        className='mt-3 w-full bg-gray-700 text-white py-2 rounded-md hover:bg-gray-600 transition'
+        type="button"
+        onClick={() => handleRemove(segment)}
+        className="bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded-md text-sm"
       >
-        Add
+        Remove
       </button>
-
-      <div className='mt-4 space-y-2'>
-        {segments.map((segment) => (
-          <div key={segment} className='flex items-center justify-between bg-gray-900 px-4 py-2 rounded-md'>
-            <span className='text-white'>{segment}</span>
-            <button
-              type='button'
-              onClick={() => handleRemove(segment)}
-              className='bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded-md text-sm'
-            >
-              Remove
-            </button>
-          </div>
-        ))}
-      </div>
     </div>
+  ))}
+</div>
+
+  </div>
+
+  
+
+  {/* Intraday Square */}
   <div>
-    <label className='block font-medium text-gray-300 text-sm'>
-      Intraday Square
-    </label>
+    <label className="block text-sm font-medium text-white">Intraday Square</label>
     <select
       name="intradaySquare"
+      value={formData.intradaySquare}
       onChange={handleChange}
-      className="block bg-gray-800 shadow-sm mt-1 p-4 border-gray-700 focus:border-indigo-500 rounded-md focus:ring-indigo-500 w-full text-white"
+      className="bg-gray-800 text-white p-3 rounded-md w-full"
     >
       <option value="">Select Value</option>
       <option value="true">True</option>
       <option value="false">False</option>
     </select>
   </div>
+
+  {/* Ledger Balance Close (%) */}
   <div>
-    <label className='block font-medium text-gray-300 text-sm'>
-      Ledger Balance Close (%)
-    </label>
+    <label className="block text-sm font-medium text-white">Ledger Balance Close (%)</label>
     <input
+      type="number"
+      name="ledgerBalanceClose"
+      value={formData.ledgerBalanceClose}
       onChange={handleChange}
-      name='ledgerBalanceClose'
-      type='number'
-      min='0'
-      max='1000000'
-      placeholder='90'
-      className='block bg-gray-800 shadow-sm mt-1 p-4 border-gray-700 focus:border-indigo-500 rounded-md focus:ring-indigo-500 w-full text-white'
+      placeholder="90"
+      min="0"
+      max="1000000"
+      className="bg-gray-800 text-white p-3 rounded-md w-full"
     />
   </div>
+
+  {/* Profit Trade Hold Min Seconds */}
   <div>
-    <label className='block font-medium text-gray-300 text-sm'>
-      Profit Trade Hold Min Seconds
-    </label>
+    <label className="block text-sm font-medium text-white">Profit Trade Hold Min Seconds</label>
     <input
-      name='profitTradeHoldMinSec'
+      type="number"
+      name="profitTradeHoldMinSec"
+      value={formData.profitTradeHoldMinSec}
       onChange={handleChange}
-      type='number'
-      min='0'
-      max='100'
-      placeholder='0'
-      className='block bg-gray-800 shadow-sm mt-1 p-4 border-gray-700 focus:border-indigo-500 rounded-md focus:ring-indigo-500 w-full text-white'
+      placeholder="0"
+      min="0"
+      max="100"
+      className="bg-gray-800 text-white p-3 rounded-md w-full"
     />
   </div>
+
+  {/* Loss Trade Hold Min Seconds */}
   <div>
-    <label className='block font-medium text-gray-300 text-sm'>
-      Loss Trade Hold Min Seconds
-    </label>
+    <label className="block text-sm font-medium text-white">Loss Trade Hold Min Seconds</label>
     <input
-      name='lossTradeHoldMinSec'
+      type="number"
+      name="lossTradeHoldMinSec"
+      value={formData.lossTradeHoldMinSec}
       onChange={handleChange}
-      type='number'
-      min='0'
-      max='100'
-      placeholder='0'
-      className='block bg-gray-800 shadow-sm mt-1 p-4 border-gray-700 focus:border-indigo-500 rounded-md focus:ring-indigo-500 w-full text-white'
+      placeholder="0"
+      min="0"
+      max="100"
+      className="bg-gray-800 text-white p-3 rounded-md w-full"
     />
   </div>
-  {/* <div>
-    <button
-      type='submit'
-      className='bg-green-600 hover:bg-green-500 px-4 py-2 rounded w-full text-white'
-    >
-      Submit
-    </button>
-  </div> */}
-  <div>
+
+
+{/* mcx fields */}
+<div>
   <div
   onClick={() => setShowFields(!showFields)}
   className="cursor-pointer bg-gray-600 hover:bg-blue-700 w-[50%] text-white font-semibold py-2 px-4 rounded-md text-center transition duration-300"
@@ -518,10 +651,10 @@ const Page = () => {
     
       )}
     </div>
-   
 
-    {/* MCXOPTBUY */}
-    <div className="mt-6">
+{/* mcxBuyandSell  */}
+
+<div className="mt-6">
         <div
           onClick={() => setShowMCXOPTBUY(!showMCXOPTBUY)}
           className="cursor-pointer bg-gray-600 hover:bg-blue-700 w-[60%] text-white font-semibold py-2 px-4 rounded-md text-center transition duration-300"
@@ -669,9 +802,6 @@ const Page = () => {
 
   </div>
 )}
-
-
-{/* MCXOPT */}
 
 <div>
   <div
@@ -1170,10 +1300,8 @@ const Page = () => {
       )}
     </div>
 
-{/* 5 TOGEATHER */}
 
-{/* no1 */}
-<div
+    <div
         onClick={() => setShowSTKOPTSELL(!showSTKOPTSELL)}
         className="cursor-pointer mt-3 bg-gray-600 hover:bg-blue-700 w-[60%] text-white font-semibold py-2 px-4 rounded-md text-center transition duration-300"
       >
@@ -1325,40 +1453,18 @@ const Page = () => {
 </div>
 
 )}
-
-
-
-
-    <div>
-    <button
-      type='submit'
-      className='bg-green-600 hover:bg-green-500 px-4 py-2 rounded w-full text-white'
-    >
-      Submit
-    </button>
-  </div>
+  {/* Submit Button */}
+  <button
+    type="submit"
+    className="bg-green-600 hover:bg-green-500 px-4 py-2 rounded w-full text-white"
+  >
+    Update User
+  </button>
 </form>
 
-
-
-            {/* Right Column with Toggle Switches */}
-            <div className='space-y-4'>
-              {[
-                'Activation',
-                'Read Only',
-                'Demo',
-                'Intraday Square',
-                'Block Limit Above/Below High Low',
-                'Block Limit Between High Low'
-              ].map(label => (
-                <ToggleSwitch key={label} label={label} />
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Page
+export default UpdatePage;

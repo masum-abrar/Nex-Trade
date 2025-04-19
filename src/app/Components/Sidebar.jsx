@@ -58,7 +58,7 @@ export const Sidebar = () => {
               <div className="flex items-center space-x-2">
                 <span>{userInfo.username}</span>
                 <span className="text-sm text-gray-400">{userInfo.role}</span>
-                <span className="text-sm text-gray-400">{userInfo.id}</span>
+                {/* <span className="text-sm text-gray-400">{userInfo.id}</span> */}
               </div>
             </div>
           </div>

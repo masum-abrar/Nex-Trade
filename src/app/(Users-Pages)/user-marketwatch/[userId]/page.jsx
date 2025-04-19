@@ -25,6 +25,18 @@ const MarketWatch = ({ params }) => {
   const [brokerUser, setBrokerUser] = useState(null);
 const lotSize = 30;
 const calculatedQty = orderLots * lotSize;
+// 1️⃣ Define mapping of allowed segments to tabs
+const segmentTabsMap = {
+  NSE: ['NSEFUT', 'NSEOPT'],
+  MCX: ['MCXFUT', 'MCXOPT'],
+  BSE: ['BSE-FUT', 'BSE-OPT'],
+};
+
+// 2️⃣ Split allowed segments (like "NSE,MCX") into an array
+const allowedSegments = brokerUser?.segmentAllow?.split(',') || [];
+
+// 3️⃣ Get tabs based on allowed segments
+const visibleTabs = allowedSegments.flatMap(segment => segmentTabsMap[segment] || []);
 
 
 useEffect(() => {
@@ -53,6 +65,11 @@ useEffect(() => {
     setSelectedDataPoint(null);
   };
   const handleOrder = async (orderType) => {
+    const maxLots = brokerUser?.mcx_maxLots;
+  if (orderLots > maxLots) {
+    toast.error("Order Lots should not exceed Max Lots");
+    return;
+  }
   const orderData = {
     scriptName: info.find(item => item.SEM_SMST_SECURITY_ID === parseInt(selectedDataPoint?.securityId))?.SEM_TRADING_SYMBOL || 'Unknown',
     ltp: selectedDataPoint?.ltp || null,
@@ -416,7 +433,7 @@ useEffect(() => {
          <div className="flex justify-between">
          <div>
             <p className="text-sm">Ledger Balance</p>
-            <p className="text-xl font-bold">₹7,243,81</p>
+            <p className="text-xl font-bold">{brokerUser?.ledgerBalanceClose}</p>
           </div>
           <div>
             <p className="text-sm">Margin Available</p>
@@ -444,22 +461,21 @@ useEffect(() => {
 
 
 <div className='flex space-x-4 mt-6 p-4 border-gray-600 border-b overflow-x-auto mb-6'>
-        {['NSEFUT', 'NSEOPT', 'MCXFUT', 'MCXOPT', 'BSE-FUT', 'BSE-OPT'].map(
-          item => (
-            <button
-              key={item}
-              onClick={() => setActiveTab(item)}
-              className={`px-4 py-2 focus:outline-none ${
-                activeTab === item
-                  ? 'border-b-2 border-blue-500 text-blue-500'
-                  : 'text-gray-400'
-              } hover:text-white`}
-            >
-              {item}
-            </button>
-          )
-        )}
-      </div>
+  {visibleTabs.map(item => (
+    <button
+      key={item}
+      onClick={() => setActiveTab(item)}
+      className={`px-4 py-2 focus:outline-none ${
+        activeTab === item
+          ? 'border-b-2 border-blue-500 text-blue-500'
+          : 'text-gray-400'
+      } hover:text-white`}
+    >
+      {item}
+    </button>
+  ))}
+</div>
+
       <div className='flex items-center space-x-3 bg-[#213743] m-4 p-3 rounded-sm cursor-pointer'>
         <img
           className='w-6 h-6'
@@ -620,7 +636,7 @@ useEffect(() => {
 
       {/* Lot Size & Quantity */}
       <div className="flex justify-between text-gray-300 mb-2 bg-gray-800 p-3 text-sm">
-        <span>Max Lots : 50</span>
+        <span>Max Lots : {brokerUser?.mcx_maxLots ?? 'Loading...'}</span>
         <span>Order Lots: {orderLots}</span>
         <span>Lot Size : {lotSize}</span>
         <span>Qty: {calculatedQty}</span>
@@ -655,21 +671,37 @@ useEffect(() => {
 
       {/* Margin & Carry Calculation */}
       <div className="flex justify-between text-gray-300 mb-2 bg-gray-800 mt-9 mb-5 p-3 text-sm">
-        <span>Margin: {brokerUser?.mcx_intraday ? (lotSize * selectedDataPoint?.askPrice) / brokerUser.mcx_intraday : 'Loading...'}</span>
-        <span>Carry: {brokerUser?.mcx_intraday ? ((lotSize * selectedDataPoint?.askPrice) / brokerUser.mcx_intraday) * 1.1 : 'Loading...'}</span>
+        <span>Margin: {brokerUser?.mcx_intraday ? ((calculatedQty * selectedDataPoint?.askPrice) / brokerUser.mcx_intraday).toFixed(2) : 'Loading...'}</span>
+        <span>
+  Carry: {
+    brokerUser?.mcx_intraday
+      ? (
+          ((calculatedQty * selectedDataPoint?.askPrice) / brokerUser.mcx_intraday) * 1.1
+        ).toFixed(2)
+      : 'Loading...'
+  }
+</span>
+
         <span>Margin Limit : {brokerUser?.mcx_holding ?? 'Loading...'}</span>
       </div>
 
       {/* BUY & SELL Buttons */}
       <div className="flex gap-4">
-        <button onClick={() => handleOrder("BUY")} className="w-1/2 bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded">
-          BUY
-        </button>
+  <button
+    onClick={() => handleOrder("BUY")}
+    className="w-1/2 bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded"
+  >
+    BUY
+  </button>
 
-        <button onClick={() => handleOrder("SELL")} className="w-1/2 bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded">
-          SELL
-        </button>
-      </div>
+  <button
+    onClick={() => handleOrder("SELL")}
+    className="w-1/2 bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded"
+  >
+    SELL
+  </button>
+</div>
+
     </div>
   </div>
 )}
