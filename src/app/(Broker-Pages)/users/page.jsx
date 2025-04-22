@@ -4,10 +4,21 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '../../Components/Navbar';
 import Cookies from 'js-cookie';
-
+import { toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const Page = () => {
   const [users, setUsers] = useState([]);
   const router = useRouter();
+  const [userInfo, setUserInfo] = useState(null);
+
+ // Load user info from cookies when the sidebar mounts
+  useEffect(() => {
+    const storedUser = Cookies.get('userInfo');
+    if (storedUser) {
+      setUserInfo(JSON.parse(storedUser));
+    }
+  }, []);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -23,10 +34,16 @@ const Page = () => {
     fetchUsers();
   }, []);
   const handleUpdate = (userId) => {
-    if (userId) {
-      router.push(`/update/${userId}`);
+    const role = userInfo?.role; // or wherever you're storing the logged-in user role
+  
+    if (role === "Admin") {
+      if (userId) {
+        router.push(`/update/${userId}`);
+      } else {
+        toast.error("User ID not found!");
+      }
     } else {
-      alert('User ID not found!');
+      toast.warning("Only Admins can update users!");
     }
   };
 
@@ -58,7 +75,7 @@ const Page = () => {
                 <tr className="bg-gray-800 text-gray-200">
                   <th className="p-3">UserID</th>
                   <th className="p-3">Name</th>
-                  <th className="p-3">Mobile</th>
+                  <th className="p-3">ledgerBalance</th>
                   <th className="p-3">Type</th>
                   <th className="p-3">MarginType</th>
                   <th className="p-3">Segment</th>
@@ -70,7 +87,7 @@ const Page = () => {
                   <tr key={idx} className="hover:bg-gray-500 transition duration-200 text-center">
                     <td className="p-3">{user.loginUsrid}</td>
                     <td className="p-3">{user.username}</td>
-                    <td className="p-3">{user.mobile || 'N/A'}</td>
+                    <td className="p-3">{user.ledgerBalanceClose || 'N/A'}</td>
                     <td className="p-3">{user.role}</td>
                     {/* <td className="p-3">{user.isActive ? 'YES' : 'NO'}</td> */}
                     <td className="p-3">{user.marginType}</td>
@@ -82,6 +99,7 @@ const Page = () => {
 >
   Update
 </button>
+
 
                     </td>
                   </tr>
@@ -96,6 +114,7 @@ const Page = () => {
           </div>
         </div>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

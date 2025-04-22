@@ -46,10 +46,25 @@ export default function LoginPage () {
         setErrorMessage('');
 
         // Save user info in cookies
-        Cookies.set('userInfo', JSON.stringify({ userId: loginData.userId, role: data.role , username: data.username,  id: data.id, }), { expires: 7 });
-
+        Cookies.set('userInfo', JSON.stringify({
+          userId: loginData.userId,
+          role: data.role,
+          username: data.username,
+          id: data.id,
+          ledgerBalanceClose: data.ledgerBalanceClose, // ✅ Add this line
+        }), { expires: 7 });
+        
+        
         // Update state to reflect the stored user info
-        setUserInfo({ userId: loginData.userId, role: data.role , username: data.username,  });
+        setUserInfo({
+          userId: loginData.userId,
+          role: data.role,
+          username: data.username,
+          id: data.id,
+          ledgerBalanceClose: data.ledgerBalanceClose, // ✅ Add this line
+        });
+        
+        
 
        if (data.role === 'User') {
   window.location.href = `/user-marketwatch/${data.id}`;
@@ -58,6 +73,9 @@ export default function LoginPage () {
           window.location.href = '/marketwatch';
         }
         else if (data.role === 'Broker') {
+            window.location.href = '/dashboard';
+          }
+          else if (data.role === 'Admin') {
             window.location.href = '/dashboard';
           }
       } catch (error) {

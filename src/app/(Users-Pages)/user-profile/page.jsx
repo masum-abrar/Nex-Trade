@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   FaChartBar,
   FaShoppingCart,
@@ -9,9 +9,29 @@ import {
 } from "react-icons/fa";
 import BottomNav from "../BotomNav";
 import Link from "next/link";
-
+import Cookies from "js-cookie";
+import { useRouter } from 'next/navigation';
 const page = () => {
   const [showFunds, setShowFunds] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
+  const router = useRouter();
+    useEffect(() => {
+      const storedUser = Cookies.get('userInfo');
+      if (storedUser) {
+        setUserInfo(JSON.parse(storedUser));
+      }
+    }, []);
+     const handleLogout = () => {
+        Cookies.remove('userId');  // Remove user ID
+        Cookies.remove('username'); // Remove username
+        Cookies.remove('role');
+        Cookies.remove('id');
+        Cookies.remove('ledgerBalanceClose'); // Remove ledger balance close
+        Cookies.remove('userInfo'); // Remove user info
+         // Remove role if needed
+    
+        router.push('/login'); // Redirect to login page
+      };
   return (
     <div className="bg-gray-900 text-white min-h-screen">
       <div className="p-4 border-b border-gray-700 container mx-auto relative">
@@ -36,7 +56,11 @@ const page = () => {
               <div className="flex justify-between">
                 <div>
                   <p className="text-sm">Ledger Balance</p>
-                  <p className="text-xl font-bold">₹7,243,81</p>
+                  <p className="text-xl font-bold">
+  ₹{Number(userInfo?.ledgerBalanceClose || 0).toLocaleString("en-IN")}
+</p>
+
+
                 </div>
                 <div>
                   <p className="text-sm">Margin Available</p>
@@ -76,25 +100,34 @@ const page = () => {
      
       </div>
       <div className="space-y-2 mt-4 p-4 bg-gray-800 flex gap-4 rounded-xl container mx-auto">
-          <div >
-            <h1 className="font-bold">Userid</h1>
-            <p>KEI508</p>
-          </div>
-          <div>
-            <h1 className="font-bold">Username</h1>
-            <p>DEMO</p>
-          </div>
-        </div> 
-        <div className="mt-4 p-4 bg-gray-800 rounded-xl container mx-auto mb-4">
+     
+  {userInfo && (
+    <div className="flex gap-4">
+      <div>
+        <h1 className="font-bold">Userid</h1>
+        <p>{userInfo.userId}</p>
+      </div>
+      <div>
+        <h1 className="font-bold">Username</h1>
+        <p>{userInfo.username}</p>
+      </div>
+    </div>
+  )}
+</div>
+
+
+<div className="mt-4 p-4 bg-gray-800 rounded-xl container mx-auto mb-4">
   {["Ledger Logs", "Margin", "Change Password", "Scripts Setting", "Reports", "Logout"].map((item, index) => (
     <div
       key={index}
       className="py-3 border-b border-gray-700 text-white cursor-pointer hover:text-blue-400 transition"
+      onClick={item === "Logout" ? handleLogout : undefined} // Add handleLogout on Logout
     >
       {item}
     </div>
   ))}
 </div>
+
 
 
       {/* Bottom Navigation */}

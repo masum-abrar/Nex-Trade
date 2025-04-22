@@ -6,10 +6,26 @@ const BottomNav = () => {
   const [currentPath, setCurrentPath] = useState("");
   const [userInfo, setUserInfo] = useState(null);
 
+
+   useEffect(() => {
+        const storedUser = Cookies.get('userInfo');
+        if (storedUser) {
+          setUserInfo(JSON.parse(storedUser));
+        }
+      }, []);
   useEffect(() => {
     // Update the current path on mount
     setCurrentPath(window.location.pathname);
   }, []);
+   const handleLogout = () => {
+      Cookies.remove('userId');  // Remove user ID
+      Cookies.remove('username'); // Remove username
+      Cookies.remove('role');
+      Cookies.remove('id');
+       // Remove role if needed
+  
+      router.push('/login'); // Redirect to login page
+    };
 
   // Compare the path with the link's href to set the active class
   const getLinkClass = (linkPath) => {
@@ -55,7 +71,10 @@ const BottomNav = () => {
           className={`flex flex-col items-center hover:text-white transition ${getLinkClass("/user-profile")}`}
         >
           <FaCog size={20} />
-          <span className="text-xs">Settings</span>
+          
+          <span className="text-xs font-bold">
+  {userInfo?.userId}
+</span>
         </div>
       </Link>
     </div>

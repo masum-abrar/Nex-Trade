@@ -12,7 +12,7 @@ const Navbar = () => {
     { label: "DASHBOARD", href: "/dashboard" },
     { label: "ORDERS", href: "/orders" },
     { label: "POSITION", href: "/position" },
-    { label: "UPDATE", href: "/update" },
+    { label: "UPDATE", href: "/users" },
     { label: "USERS", href: "/users" },
     { label: "ACT LEDGER", href: "/ledger" },
     { label: "ACCOUNTS", href: "/accounts" },

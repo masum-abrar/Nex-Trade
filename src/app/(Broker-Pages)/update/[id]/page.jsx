@@ -27,7 +27,7 @@ const UpdatePage = () => {
        //new
        const [showSTKOPTSELL, setShowSTKOPTSELL] = useState(true); // Default show STKOPTSELL
        const [showSTKOPT, setShowSTKOPT] = useState(false);
-  const allOptions = ['NSE', 'BSE', 'MCX', 'CDS', 'FO']; // or fetch from API
+  const allOptions = ['NSE', 'BSE', 'MCX',]; // or fetch from API
   
   const [formData, setFormData] = useState({
     loginUsrid: '',
@@ -348,9 +348,9 @@ STKOPT_sellingOvernight: user.STKOPT_sellingOvernight || '',
   
 
   return (
-    <div className='flex'>
+    <div className='flex h-screen'>
        <Sidebar />
-       <div className='flex-1 bg-[#071824] min-h-screen text-white'>
+       <div className='flex-1 overflow-y-auto bg-[#071824]  text-white'>
       <Navbar />
      
       <form className="space-y-4 p-6" onSubmit={handleSubmit}>

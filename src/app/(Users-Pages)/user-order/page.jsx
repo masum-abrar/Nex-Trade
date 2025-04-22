@@ -3,11 +3,13 @@ import React, { useState,useEffect } from "react";
 
 import { FaChartBar, FaShoppingCart, FaBolt, FaCog, FaChevronDown  } from "react-icons/fa";
 import BottomNav from "../BotomNav";
+import Cookies from "js-cookie";
 
 const Page = () => {
     const [activeTab, setActiveTab] = useState("Open");
     const [showFunds, setShowFunds] = useState(false);
     const [orders, setOrders] = useState([]);
+    const [userInfo, setUserInfo] = useState(null);
 
     useEffect(() => {
       const fetchExecutedOrders = async () => {
@@ -28,6 +30,12 @@ const Page = () => {
         fetchExecutedOrders();
       }
     }, [activeTab]);
+      useEffect(() => {
+          const storedUser = Cookies.get('userInfo');
+          if (storedUser) {
+            setUserInfo(JSON.parse(storedUser));
+          }
+        }, []);
   return (
     <div className="bg-gray-900 text-white min-h-screen flex flex-col justify-between">
       {/* Auto-running Notice */}
@@ -55,7 +63,9 @@ const Page = () => {
               <div className="flex justify-between">
                 <div>
                   <p className="text-sm">Ledger Balance</p>
-                  <p className="text-xl font-bold">₹7,243,81</p>
+                  <p className="text-xl font-bold">
+  ₹{Number(userInfo?.ledgerBalanceClose || 0).toLocaleString("en-IN")}
+</p>
                 </div>
                 <div>
                   <p className="text-sm">Margin Available</p>

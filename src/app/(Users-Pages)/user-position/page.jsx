@@ -1,12 +1,52 @@
 'use client'
 
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { FaChartBar, FaShoppingCart, FaBolt, FaCog,FaChevronDown  } from "react-icons/fa";
 import BottomNav from "../BotomNav";
+import Cookies from "js-cookie";
 
 const Page = () => {
     const [activeTab, setActiveTab] = useState("Position");
      const [showFunds, setShowFunds] = useState(false);
+      const [userInfo, setUserInfo] = useState(null);
+ const [orders, setOrders] = useState([]);
+ const [randomPL, setRandomPL] = useState(null);
+const [plStatus, setPlStatus] = useState("");
+
+useEffect(() => {
+  const newPL = parseFloat((Math.random() * 1000 - 500).toFixed(2)); // -500 to +500
+  setRandomPL(newPL);
+  setPlStatus(newPL >= 0 ? "Profit" : "Loss");
+}, []);
+
+ 
+
+       useEffect(() => {
+           const fetchExecutedOrders = async () => {
+             try {
+               const response = await fetch("http://localhost:4000/api/v1/executed-orders");
+               const result = await response.json();
+               if (result.success) {
+                 setOrders(result.orders);
+               } else {
+                 console.error("Failed to fetch executed orders");
+               }
+             } catch (error) {
+               console.error("Error fetching orders:", error);
+             }
+           };
+       
+           if (activeTab === "Position" || activeTab === "Open") {
+             fetchExecutedOrders();
+           }
+         }, [activeTab]);
+
+           useEffect(() => {
+               const storedUser = Cookies.get('userInfo');
+               if (storedUser) {
+                 setUserInfo(JSON.parse(storedUser));
+               }
+             }, []);
   return (
     <div className="bg-gray-900 text-white min-h-screen flex flex-col justify-between">
    
@@ -28,7 +68,9 @@ const Page = () => {
                     <div className="flex justify-between">
                       <div>
                         <p className="text-sm">Ledger Balance</p>
-                        <p className="text-xl font-bold">₹7,243,81</p>
+                        <p className="text-xl font-bold">
+  ₹{Number(userInfo?.ledgerBalanceClose || 0).toLocaleString("en-IN")}
+</p>
                       </div>
                       <div>
                         <p className="text-sm">Margin Available</p>
@@ -66,18 +108,76 @@ const Page = () => {
 
       {/* Tab Content */}
       <div className="mt-4 text-white p-4 ">
+        
         {activeTab === "Closed" && <p>Showing Closed Orders...</p>}
-        {activeTab === "Position" && <div className="bg-gray-800 p-4 rounded-md">
-            
-          <div className="text-center">
+        {activeTab === "Position" && (
+  <div>
+    <div className="text-center bg-gray-800 p-4 rounded-md mb-4">
           <h1>Total P&L</h1>
-          <p className="text-green-500">0.00</p>
+          <p className={`${randomPL >= 0 ? "text-green-500" : "text-red-500"}`}>
+  ₹{randomPL != null ? randomPL.toFixed(2) : "0.00"}
+</p>
+
           </div>
-            
-            </div>}
+    {orders.length > 0 ? (
+      orders.map((order) => {
+        // Randomly simulate profit or loss for each order
+        const randomPL = (Math.random() * 2 - 1) * order.quantity * 10; // Simulating P/L based on quantity and random fluctuation
+        const plStatus = randomPL >= 0 ? "Profit" : "Loss";
+        
+        return (
+          <div key={order.id} className="bg-gray-800 text-white p-4 rounded-lg mb-2 flex justify-between items-center">
+            {/* Left Side: Order Type, Qty, Script Name */}
+            <div className="flex flex-col">
+              <span className={`text-lg font-bold ${order.orderType === "BUY" ? "text-green-400" : "text-red-400"}`}>
+                {order.orderType}
+              </span>
+              <p className="text-gray-300 text-sm">Qty: {order.quantity}</p>
+              <h3 className="text-lg font-semibold">
+                {order.scriptName}
+              </h3>
+            </div>
+
+            {/* Right Side: Time, Status, Order Type */}
+            <div className="flex flex-col text-right">
+              <div className="">
+                <span className="text-gray-400 text-sm">{new Date(order.createdAt).toLocaleTimeString()}</span>
+                {/* <span className="text-green-600 font-semibold">Active</span> */}
+              </div>
+              <span className="text-gray-400">{order.ltp}</span>
+              <div>
+              {randomPL !== null && (
+  <span
+    className={`text-lg font-bold ${
+      plStatus === "Profit" ? "text-green-400" : "text-red-400"
+    }`}
+  >
+    {plStatus}: {randomPL.toFixed(2)}
+  </span>
+)}
+
+    </div>
+              <span className="text-gray-400">{order.priceType}</span>
+              
+            </div>
+
+            {/* Display P/L */}
+            {/* <div className="text-right mt-2">
+              <span className={`text-lg font-bold ${plStatus === "Profit" ? "text-green-400" : "text-red-400"}`}>
+                {plStatus}: {randomPL.toFixed(2)}
+              </span>
+            </div> */}
+          </div>
+        );
+      })
+    ) : (
+      <p className="text-gray-400">No executed orders found.</p>
+    )}
+  </div>
+)}
         {activeTab === "Active" && <p>Showing Active Orders...</p>}
       </div>
-      <div className="flex-1 flex flex-col  justify-center text-center">
+      {/* <div className="flex-1 flex flex-col  justify-center text-center">
        
       
         <div className="flex flex-col items-center">
@@ -89,7 +189,7 @@ const Page = () => {
           <p className="text-lg font-semibold mt-4">No Position</p>
           <p className="text-sm text-gray-400">Place an order from watchlist</p>
         </div>
-      </div>
+      </div> */}
 
       {/* Bottom Navigation */}
    <BottomNav/>
