@@ -41,7 +41,7 @@ const Page = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:4000/api/v1/deposite', {
+      const response = await fetch('https://nex-trade-backend.vercel.app/api/v1/deposite', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

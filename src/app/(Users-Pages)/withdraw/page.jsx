@@ -44,7 +44,7 @@ const WithdrawRequestForm = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch('http://localhost:4000/api/v1/withdraw', {
+      const res = await fetch('https://nex-trade-backend.vercel.app/api/v1/withdraw', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

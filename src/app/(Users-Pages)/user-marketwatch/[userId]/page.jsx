@@ -42,7 +42,7 @@ const visibleTabs = allowedSegments.flatMap(segment => segmentTabsMap[segment] |
 useEffect(() => {
   const fetchBrokerUser = async () => {
     try {
-      const res = await fetch(`http://localhost:4000/api/v1/brokerusers/${userId}`);
+      const res = await fetch(`https://nex-trade-backend.vercel.app/api/v1/brokerusers/${userId}`);
       const data = await res.json();
       if (data.success) {
         setBrokerUser(data.user);
@@ -91,7 +91,7 @@ useEffect(() => {
   };
 
   try {
-    const response = await fetch("http://localhost:4000/api/v1/tradeorder", {
+    const response = await fetch("https://nex-trade-backend.vercel.app/api/v1/tradeorder", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

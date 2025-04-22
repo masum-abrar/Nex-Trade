@@ -172,7 +172,7 @@ const Page = () => {
     console.log(formData)
     try {
       const response = await fetch(
-        'http://localhost:4000/api/v1/brokerusers',
+        'https://nex-trade-backend.vercel.app/api/v1/brokerusers',
         {
           method: 'POST',
           headers: {

@@ -12,8 +12,8 @@ const LedgerRequests = () => {
     const fetchData = async () => {
       const url =
         activeTab === "deposit"
-          ? "http://localhost:4000/api/v1/deposites"
-          : "http://localhost:4000/api/v1/withdraws";
+          ? "https://nex-trade-backend.vercel.app/api/v1/deposites"
+          : "https://nex-trade-backend.vercel.app/api/v1/withdraws";
       try {
         const response = await fetch(url);
         const data = await response.json();
