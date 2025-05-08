@@ -2,12 +2,29 @@
 import React from 'react';
 import Sidebar from '../../Components/Sidebar';
 import Navbar from '../../Components/Navbar';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
+
 
 const HomePage = () => {
     const [includeClients, setIncludeClients] = useState(false);
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
+    const router = useRouter();
+    useEffect(() => {
+      const userInfo = Cookies.get('userInfo');
+    
+      if (!userInfo) {
+        router.push('/login');
+      } else {
+        const user = JSON.parse(userInfo);
+    
+        if (!user.userId || (user.role !== 'Broker' && user.role !== 'Admin')) {
+          router.replace('/unauthorized'); 
+        }
+      }
+    }, []);
   
   return (
     <div className="flex h-screen  ">

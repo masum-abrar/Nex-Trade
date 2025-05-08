@@ -1,8 +1,18 @@
-'use client'; // if you're using Next.js App Router
+'use client'; 
 
 import { useState,useEffect } from 'react';
 import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
+
+
 const WithdrawRequestForm = () => {
+
+  const [brokerUser, setBrokerUser] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
+
   const [formData, setFormData] = useState({
     type: 'Withdraw',
     amount: '',
@@ -13,6 +23,43 @@ const WithdrawRequestForm = () => {
     loginUserId: '',
     username: '',
   });
+
+
+  useEffect(() => {
+   
+    const fetchBrokerUser = async () => {
+       const userInfo = Cookies.get('userInfo');
+       const userId = JSON.parse(userInfo).id; // Get the userId from the userInfo state
+      try {
+        const res = await fetch(`http://localhost:4000/api/v1/brokerusers/${userId}`);
+        const data = await res.json();
+        if (data.success) {
+          setBrokerUser(data.user);
+        } else {
+          console.error("User not found");
+        }
+      } catch (error) {
+        console.error("Failed to fetch broker user", error);
+      }
+    };
+    fetchBrokerUser();
+  }, [userInfo?.id]);
+
+ const router = useRouter();
+       useEffect(() => {
+         const userInfo = Cookies.get('userInfo');
+       
+         if (!userInfo) {
+           router.push('/login');
+         } else {
+           const user = JSON.parse(userInfo);
+       
+           if (!user.userId || (user.role !== 'User')) {
+             router.replace('/unauthorized'); 
+           }
+         }
+       }, []);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,22 +89,36 @@ const WithdrawRequestForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    const amount = parseFloat(formData.amount);
+    const balance = parseFloat(brokerUser?.ledgerBalanceClose || 0);
+  
+    if (amount < 1000) {
+      toast.error("You cannot withdraw less than ₹1000");
+      return;
+    }
+  
+    if (amount > balance) {
+      toast.error("Insufficient balance for withdrawal");
+      return;
+    }
+  
     try {
-      const res = await fetch('https://nex-trade-backend.vercel.app/api/v1/withdraw', {
+      const res = await fetch('http://localhost:4000/api/v1/withdraw', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-
+  
       const data = await res.json();
-      console.log(data); // success or error response
-      alert('Request submitted successfully!');
+      console.log(data);
+      toast.success('Request submitted successfully! wait for admin approval');
     } catch (error) {
       console.error('Error:', error);
       alert('Something went wrong.');
     }
   };
+  
 
   return (
     <div className="max-w-full bg-gray-900 mx-auto p-6 text-white">
@@ -137,6 +198,7 @@ const WithdrawRequestForm = () => {
           <li>Amount will be withdrawn to the same account from which it was deposited.</li>
         </ul>
       </div>
+      <ToastContainer/>
     </div>
   );
 };

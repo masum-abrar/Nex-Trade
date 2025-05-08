@@ -11,6 +11,21 @@ const Page = () => {
   const [users, setUsers] = useState([]);
   const router = useRouter();
   const [userInfo, setUserInfo] = useState(null);
+  
+ useEffect(() => {
+      const userInfo = Cookies.get('userInfo');
+    
+      if (!userInfo) {
+        router.push('/login');
+      } else {
+        const user = JSON.parse(userInfo);
+    
+        if (!user.userId || (user.role !== 'Broker' && user.role !== 'Admin')) {
+          router.replace('/unauthorized'); 
+        }
+      }
+    }, []);
+
 
  // Load user info from cookies when the sidebar mounts
   useEffect(() => {
@@ -23,7 +38,7 @@ const Page = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch('https://nex-trade-backend.vercel.app/api/v1/brokerusers');
+        const res = await fetch('http://localhost:4000/api/v1/brokerusers');
         const data = await res.json();
         setUsers(data); // assuming data is an array
       } catch (err) {

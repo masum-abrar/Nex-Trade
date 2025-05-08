@@ -4,20 +4,62 @@ import React, { useState,useEffect } from "react";
 import { FaChartBar, FaShoppingCart, FaBolt, FaCog, FaChevronDown  } from "react-icons/fa";
 import BottomNav from "../BotomNav";
 import Cookies from "js-cookie";
+import { useRouter } from 'next/navigation'
+
 
 const Page = () => {
     const [activeTab, setActiveTab] = useState("Open");
     const [showFunds, setShowFunds] = useState(false);
     const [orders, setOrders] = useState([]);
     const [userInfo, setUserInfo] = useState(null);
+    const [brokerUser, setBrokerUser] = useState(null);
+    const userId = userInfo?.id
+    const router = useRouter();
+       useEffect(() => {
+         const userInfo = Cookies.get('userInfo');
+       
+         if (!userInfo) {
+           router.push('/login');
+         } else {
+           const user = JSON.parse(userInfo);
+       
+           if (!user.userId || (user.role !== 'User')) {
+             router.replace('/unauthorized'); 
+           }
+         }
+       }, []);
+
+    //  const router = useRouter();
+    //  useEffect(() => {
+    //   const userInfo = Cookies.get('userInfo');
+    //   if (!userInfo) {
+    //     router.replace('/login');
+    //     return;
+    //   }
+    
+    //   const user = JSON.parse(userInfo);
+     
+    
+    //   if (user?.id !== userId) {
+    //     router.replace('/unauthorized'); 
+    //   }
+    // }, [userId, router]);
 
     useEffect(() => {
       const fetchExecutedOrders = async () => {
         try {
-          const response = await fetch("https://nex-trade-backend.vercel.app/api/v1/executed-orders");
+          const response = await fetch("http://localhost:4000/api/v1/executed-orders");
           const result = await response.json();
+    
           if (result.success) {
-            setOrders(result.orders);
+           const userInfo = Cookies.get('userInfo'); // Make sure this matches your actual cookie key
+           const userId = JSON.parse(userInfo).userId; // Extract userId from the cookie
+    
+            const filteredOrders = result.orders.filter(
+              (order) => order.userId === userId
+            );
+    
+            setOrders(filteredOrders);
           } else {
             console.error("Failed to fetch executed orders");
           }
@@ -25,17 +67,42 @@ const Page = () => {
           console.error("Error fetching orders:", error);
         }
       };
-  
+    
       if (activeTab === "Executed" || activeTab === "Open") {
         fetchExecutedOrders();
       }
     }, [activeTab]);
+    
+
+
       useEffect(() => {
           const storedUser = Cookies.get('userInfo');
           if (storedUser) {
             setUserInfo(JSON.parse(storedUser));
           }
         }, []);
+
+
+useEffect(() => {
+ 
+  const fetchBrokerUser = async () => {
+     const userInfo = Cookies.get('userInfo');
+     const userId = JSON.parse(userInfo).id; // Get the userId from the userInfo state
+    try {
+      const res = await fetch(`http://localhost:4000/api/v1/brokerusers/${userId}`);
+      const data = await res.json();
+      if (data.success) {
+        setBrokerUser(data.user);
+      } else {
+        console.error("User not found");
+      }
+    } catch (error) {
+      console.error("Failed to fetch broker user", error);
+    }
+  };
+  fetchBrokerUser();
+}, [userInfo?.id]);
+
   return (
     <div className="bg-gray-900 text-white min-h-screen flex flex-col justify-between">
       {/* Auto-running Notice */}
@@ -63,19 +130,20 @@ const Page = () => {
               <div className="flex justify-between">
                 <div>
                   <p className="text-sm">Ledger Balance</p>
-                  <p className="text-xl font-bold">
-  ₹{Number(userInfo?.ledgerBalanceClose || 0).toLocaleString("en-IN")}
-</p>
+                
+                  <p className="text-xl font-bold">{brokerUser?.ledgerBalanceClose}</p>
+
                 </div>
                 <div>
                   <p className="text-sm">Margin Available</p>
-                  <p className="text-lg">₹0</p>
+                  <p className="text-lg">₹{brokerUser ? brokerUser.ledgerBalanceClose - brokerUser.margin_used : 0}</p>
                 </div>
               </div>
               <div className="flex justify-between">
                 <div>
                   <p className="text-sm">Margin Used</p>
-                  <p className="text-lg">₹0</p>
+                  <p className="text-xl font-bold">{brokerUser?.margin_used}</p>
+
                 </div>
                 <div>
                   <p className="text-sm">M2M Available</p>

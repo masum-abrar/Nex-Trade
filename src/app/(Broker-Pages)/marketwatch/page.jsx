@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
 import Navbar from '../../Components/Navbar'
+import { useRouter } from 'next/navigation'
+import Cookies from 'js-cookie'  
 
 const MarketPage = () => {
   const [info, setData] = useState([])
@@ -14,6 +16,25 @@ const MarketPage = () => {
   const [selectedDataPoint, setSelectedDataPoint] = useState(null)
   const [isBrokerage, setIsBrokerage] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const router = useRouter();
+
+
+    useEffect(() => {
+      const userInfo = Cookies.get('userInfo');
+    
+      if (!userInfo) {
+        router.push('/login');
+      } else {
+        const user = JSON.parse(userInfo);
+    
+        if (!user.userId || (user.role !== 'Broker' && user.role !== 'Admin')) {
+          router.replace('/unauthorized'); 
+        }
+      }
+    }, []);
+
+
+
 
   useEffect(() => {
     const checkScreenSize = () => {

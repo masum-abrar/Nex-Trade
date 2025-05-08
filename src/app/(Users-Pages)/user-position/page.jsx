@@ -4,6 +4,7 @@ import React, { useState,useEffect } from "react";
 import { FaChartBar, FaShoppingCart, FaBolt, FaCog,FaChevronDown  } from "react-icons/fa";
 import BottomNav from "../BotomNav";
 import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
     const [activeTab, setActiveTab] = useState("Position");
@@ -12,6 +13,24 @@ const Page = () => {
  const [orders, setOrders] = useState([]);
  const [randomPL, setRandomPL] = useState(null);
 const [plStatus, setPlStatus] = useState("");
+const [brokerUser, setBrokerUser] = useState(null);
+ const router = useRouter();
+       useEffect(() => {
+         const userInfo = Cookies.get('userInfo');
+       
+         if (!userInfo) {
+           router.push('/login');
+         } else {
+           const user = JSON.parse(userInfo);
+       
+           if (!user.userId || (user.role !== 'User')) {
+             router.replace('/unauthorized'); 
+           }
+         }
+       }, []);
+
+
+
 
 useEffect(() => {
   const newPL = parseFloat((Math.random() * 1000 - 500).toFixed(2)); // -500 to +500
@@ -24,14 +43,22 @@ useEffect(() => {
        useEffect(() => {
            const fetchExecutedOrders = async () => {
              try {
-               const response = await fetch("https://nex-trade-backend.vercel.app/api/v1/executed-orders");
-               const result = await response.json();
-               if (result.success) {
-                 setOrders(result.orders);
-               } else {
-                 console.error("Failed to fetch executed orders");
-               }
-             } catch (error) {
+                      const response = await fetch("http://localhost:4000/api/v1/executed-orders");
+                      const result = await response.json();
+                
+                      if (result.success) {
+                       const userInfo = Cookies.get('userInfo'); // Make sure this matches your actual cookie key
+                       const userId = JSON.parse(userInfo).userId; // Extract userId from the cookie
+                
+                        const filteredOrders = result.orders.filter(
+                          (order) => order.userId === userId
+                        );
+                
+                        setOrders(filteredOrders);
+                      } else {
+                        console.error("Failed to fetch executed orders");
+                      }
+                    } catch (error) {
                console.error("Error fetching orders:", error);
              }
            };
@@ -47,6 +74,27 @@ useEffect(() => {
                  setUserInfo(JSON.parse(storedUser));
                }
              }, []);
+useEffect(() => {
+ 
+  const fetchBrokerUser = async () => {
+    const userId = userInfo?.id; // Get the userId from the userInfo state
+    try {
+      const res = await fetch(`http://localhost:4000/api/v1/brokerusers/${userId}`);
+      const data = await res.json();
+      if (data.success) {
+        setBrokerUser(data.user);
+      } else {
+        console.error("User not found");
+      }
+    } catch (error) {
+      console.error("Failed to fetch broker user", error);
+    }
+  };
+  fetchBrokerUser();
+}, [userInfo?.id]);
+
+
+
   return (
     <div className="bg-gray-900 text-white min-h-screen flex flex-col justify-between">
    
@@ -65,29 +113,30 @@ useEffect(() => {
                 <div className="p-4 bg-gray-800 border-t border-gray-700 mt-2  w-full left-0 top-0 shadow-lg">
                   <h2 className="text-lg font-semibold">Funds</h2>
                   <div className="flex lg:justify-between flex-col mt-2 gap-4">
-                    <div className="flex justify-between">
-                      <div>
-                        <p className="text-sm">Ledger Balance</p>
-                        <p className="text-xl font-bold">
-  ₹{Number(userInfo?.ledgerBalanceClose || 0).toLocaleString("en-IN")}
-</p>
-                      </div>
-                      <div>
-                        <p className="text-sm">Margin Available</p>
-                        <p className="text-lg">₹0</p>
-                      </div>
-                    </div>
-                    <div className="flex justify-between">
-                      <div>
-                        <p className="text-sm">Margin Used</p>
-                        <p className="text-lg">₹0</p>
-                      </div>
-                      <div>
-                        <p className="text-sm">M2M Available</p>
-                        <p className="text-lg">₹0</p>
-                      </div>
-                    </div>
-                  </div>
+              <div className="flex justify-between">
+                <div>
+                  <p className="text-sm">Ledger Balance</p>
+                
+                  <p className="text-xl font-bold">{brokerUser?.ledgerBalanceClose}</p>
+
+                </div>
+                <div>
+                  <p className="text-sm">Margin Available</p>
+                  <p className="text-lg">₹{brokerUser ? brokerUser.ledgerBalanceClose - brokerUser.margin_used : 0}</p>
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div>
+                  <p className="text-sm">Margin Used</p>
+                  <p className="text-xl font-bold">{brokerUser?.margin_used}</p>
+
+                </div>
+                <div>
+                  <p className="text-sm">M2M Available</p>
+                  <p className="text-lg">₹0</p>
+                </div>
+              </div>
+            </div>
                 </div>
               )}
             </div>

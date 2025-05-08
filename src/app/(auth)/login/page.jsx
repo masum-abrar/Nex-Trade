@@ -1,6 +1,11 @@
 'use client'
 import { useState ,useEffect} from 'react'
 import Cookies from 'js-cookie'
+import { toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+
 export default function LoginPage () {
   const [serverName, setServerName] = useState('')
   const [userId, setUserId] = useState('')
@@ -12,6 +17,7 @@ export default function LoginPage () {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [userInfo, setUserInfo] = useState(null);
+  
  // Fetch user info from cookies on page load
  useEffect(() => {
     const storedUser = Cookies.get('userInfo');
@@ -20,72 +26,73 @@ export default function LoginPage () {
     }
   }, []);
 
+ 
+
   useEffect(() => {
     if (!loginData) return;
-
+  
     const loginUser = async () => {
       setErrorMessage(null);
       setSuccessMessage('');
-
+  
       try {
-        const response = await fetch('https://nex-trade-backend.vercel.app/api/v1/loginbrokerusers', {
+        const response = await fetch('http://localhost:4000/api/v1/loginbrokerusers', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(loginData),
         });
-
+  
         const data = await response.json();
-
+  
         if (!response.ok) {
+          toast.error(data.message || 'An error occurred');
           throw new Error(data.message || 'An error occurred');
         }
-
+  
+        toast.success(data.message || 'Login successful');
         setSuccessMessage(data.message);
         setErrorMessage('');
-
-        // Save user info in cookies
+  
         Cookies.set('userInfo', JSON.stringify({
           userId: loginData.userId,
           role: data.role,
           username: data.username,
           id: data.id,
-          ledgerBalanceClose: data.ledgerBalanceClose, // ✅ Add this line
+          ledgerBalanceClose: data.ledgerBalanceClose,
         }), { expires: 7 });
-        
-        
-        // Update state to reflect the stored user info
+  
         setUserInfo({
           userId: loginData.userId,
           role: data.role,
           username: data.username,
           id: data.id,
-          ledgerBalanceClose: data.ledgerBalanceClose, // ✅ Add this line
+          ledgerBalanceClose: data.ledgerBalanceClose,
         });
-        
-        
-
-       if (data.role === 'User') {
-  window.location.href = `/user-marketwatch/${data.id}`;
-}
- else if (data.role === 'Sub-Broker') {
+  
+        if (data.role === 'User') {
+          window.location.href = `/user-marketwatch/${data.id}`;
+        } else if (data.role === 'Sub-Broker') {
           window.location.href = '/marketwatch';
+        } else if (data.role === 'Broker' || data.role === 'Admin') {
+          window.location.href = '/dashboard';
         }
-        else if (data.role === 'Broker') {
-            window.location.href = '/dashboard';
-          }
-          else if (data.role === 'Admin') {
-            window.location.href = '/dashboard';
-          }
+  
       } catch (error) {
+        // toast.error(error.message || 'Something went wrong');
         setErrorMessage(error.message);
         setSuccessMessage('');
       }
     };
-
+  
     loginUser();
   }, [loginData]);
+  
+
+
+
+
   const handleLogin = (e) => {
     e.preventDefault();
     setLoginData({ userId, password });
@@ -163,6 +170,7 @@ export default function LoginPage () {
           Arth Vraddhi Solutions.
         </p>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   )
 }

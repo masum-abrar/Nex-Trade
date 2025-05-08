@@ -1,23 +1,52 @@
-'use client'
+'use client';
 import React, { useEffect, useState } from "react";
 import Navbar from "../../Components/Navbar";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+
 
 const LedgerRequests = () => {
   const [deposits, setDeposits] = useState([]);
   const [activeTab, setActiveTab] = useState("deposit");
 
+const router = useRouter();
+
+ useEffect(() => {
+      const userInfo = Cookies.get('userInfo');
+    
+      if (!userInfo) {
+        router.push('/login');
+      } else {
+        const user = JSON.parse(userInfo);
+    
+        if (!user.userId || (user.role !== 'Broker' && user.role !== 'Admin')) {
+          router.replace('/unauthorized'); 
+        }
+      }
+    }, []);
+
+
+
+
   useEffect(() => {
     const fetchData = async () => {
       const url =
         activeTab === "deposit"
-          ? "https://nex-trade-backend.vercel.app/api/v1/deposites"
-          : "https://nex-trade-backend.vercel.app/api/v1/withdraws";
+          ? "http://localhost:4000/api/v1/deposites"
+          : "http://localhost:4000/api/v1/withdraws";
+
       try {
         const response = await fetch(url);
         const data = await response.json();
-        const withStatus = data.map((item) => ({ ...item, status: "Pending" }));
+
+        // Only set status to Pending if it's missing
+        const withStatus = data.map((item) => ({
+          ...item,
+          status: item.status || "Pending",
+        }));
+
         setDeposits(withStatus);
       } catch (error) {
         console.error("Error fetching:", error);
@@ -27,15 +56,38 @@ const LedgerRequests = () => {
     fetchData();
   }, [activeTab]);
 
-  const handleStatusChange = (index, newStatus) => {
-    const updatedDeposits = [...deposits];
-    updatedDeposits[index].status = newStatus;
-    setDeposits(updatedDeposits);
+  const handleStatusChange = async (id, newStatus) => {
+    const endpoint =
+      activeTab === "deposit"
+        ? `http://localhost:4000/api/v1/update-deposites/${id}/status`
+        : `http://localhost:4000/api/v1/update-withdraws/${id}/status`;
 
-    if (newStatus === "Accepted") {
-      toast.success("Request Accepted ✅");
-    } else if (newStatus === "Rejected") {
-      toast.error("Request Rejected ❌");
+    try {
+      const response = await fetch(endpoint, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        const updated = deposits.map((item) =>
+          item.id === id ? { ...item, status: newStatus } : item
+        );
+        setDeposits(updated);
+
+        if (newStatus === "Accepted") {
+          toast.success("Request Accepted ✅");
+        } else {
+          toast.error("Request Rejected ❌");
+        }
+      } else {
+        toast.error("Failed to update status ❌");
+      }
+    } catch (err) {
+      console.error("API error:", err);
+      toast.error("Something went wrong ❌");
     }
   };
 
@@ -111,12 +163,14 @@ const LedgerRequests = () => {
                     <td className="p-3">zyan</td>
                     <td className="p-3">masum</td>
                     <td className="p-3">{deposit.loginUserId || "N/A"}</td>
-                    <td className="p-3">{deposit.depositType || deposit.type}</td>
-                    <td className="p-3">{deposit.depositAmount || deposit.amount || "N/A"}</td>
-                    
-                    {/* Dynamic Status */}
-                    <td className="p-3">{deposit.status}</td>
+                    <td className="p-3">
+                      {deposit.depositType || deposit.type}
+                    </td>
+                    <td className="p-3">
+                      {deposit.depositAmount || deposit.amount || "N/A"}
+                    </td>
 
+                    <td className="p-3">{deposit.status}</td>
                     <td className="p-3">N/A</td>
                     <td className="p-3">
                       {deposit.depositImage || deposit.withdrawImage ? (
@@ -133,20 +187,26 @@ const LedgerRequests = () => {
                       )}
                     </td>
 
-                    {/* Accept/Reject Buttons */}
+                    {/* Accept Button */}
                     <td className="p-3">
                       <button
                         className="bg-green-500 px-3 py-1 rounded text-white hover:bg-green-600 disabled:opacity-50"
-                        onClick={() => handleStatusChange(index, "Accepted")}
+                        onClick={() =>
+                          handleStatusChange(deposit.id, "Accepted")
+                        }
                         disabled={deposit.status !== "Pending"}
                       >
                         Accept
                       </button>
                     </td>
+
+                    {/* Reject Button */}
                     <td className="p-3">
                       <button
                         className="bg-red-500 px-3 py-1 rounded text-white hover:bg-red-600 disabled:opacity-50"
-                        onClick={() => handleStatusChange(index, "Rejected")}
+                        onClick={() =>
+                          handleStatusChange(deposit.id, "Rejected")
+                        }
                         disabled={deposit.status !== "Pending"}
                       >
                         Reject

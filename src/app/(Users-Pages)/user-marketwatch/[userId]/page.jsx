@@ -4,7 +4,8 @@ import * as XLSX from 'xlsx'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
-
+import Cookies from 'js-cookie'
+import { useRouter } from 'next/navigation'
 import { FaTrash, FaPlus, FaChartBar, FaShoppingCart, FaBolt, FaCog } from "react-icons/fa";
 import BottomNav from "../../BotomNav";
 
@@ -23,36 +24,61 @@ const MarketWatch = ({ params }) => {
   const [isStopLossTarget, setIsStopLossTarget] = useState(false);
   const [orderLots, setOrderLots] = useState(1);
   const [brokerUser, setBrokerUser] = useState(null);
+  const [ledgerBalance, setLedgerBalance] = useState(0);
+
+const [marginUsed, setMarginUsed] = useState(0);
+const [m2mAvailable, setM2mAvailable] = useState(0);
+
 const lotSize = 30;
 const calculatedQty = orderLots * lotSize;
-// 1️⃣ Define mapping of allowed segments to tabs
+const marginAvailable = brokerUser?.ledgerBalanceClose - brokerUser?.margin_used;
+
+
 const segmentTabsMap = {
   NSE: ['NSEFUT', 'NSEOPT'],
   MCX: ['MCXFUT', 'MCXOPT'],
   BSE: ['BSE-FUT', 'BSE-OPT'],
 };
 
-// 2️⃣ Split allowed segments (like "NSE,MCX") into an array
+ const loginUsrid = brokerUser?.loginUsrid || null;
+
 const allowedSegments = brokerUser?.segmentAllow?.split(',') || [];
 
-// 3️⃣ Get tabs based on allowed segments
+
 const visibleTabs = allowedSegments.flatMap(segment => segmentTabsMap[segment] || []);
 
+ const router = useRouter();
+ useEffect(() => {
+  const userInfo = Cookies.get('userInfo');
+  if (!userInfo) {
+    router.replace('/login');
+    return;
+  }
 
-useEffect(() => {
-  const fetchBrokerUser = async () => {
-    try {
-      const res = await fetch(`https://nex-trade-backend.vercel.app/api/v1/brokerusers/${userId}`);
-      const data = await res.json();
-      if (data.success) {
-        setBrokerUser(data.user);
-      } else {
-        console.error("User not found");
-      }
-    } catch (error) {
-      console.error("Failed to fetch broker user", error);
+  const user = JSON.parse(userInfo);
+
+
+  if (user?.id !== userId) {
+    router.replace('/unauthorized'); 
+  }
+}, [userId, router]);
+
+
+const fetchBrokerUser = async () => {
+  try {
+    const res = await fetch(`http://localhost:4000/api/v1/brokerusers/${userId}`);
+    const data = await res.json();
+    if (data.success) {
+      setBrokerUser(data.user);
+    } else {
+      console.error("User not found");
     }
-  };
+  } catch (error) {
+    console.error("Failed to fetch broker user", error);
+  }
+};
+useEffect(() => {
+ 
 
   fetchBrokerUser();
 }, [userId]);
@@ -64,17 +90,30 @@ useEffect(() => {
   const closeModal = () => {
     setSelectedDataPoint(null);
   };
-  const handleOrder = async (orderType) => {
-    const maxLots = brokerUser?.mcx_maxLots;
+
+const handleOrder = async (orderType) => {
+  const maxLots = brokerUser?.mcx_maxLots;
+
+  // Check if orderLots exceed maxLots
   if (orderLots > maxLots) {
     toast.error("Order Lots should not exceed Max Lots");
     return;
   }
+
+  const requiredMargin = (calculatedQty * selectedDataPoint?.askPrice) / brokerUser?.mcx_intraday;
+
+  // Check if sufficient margin balance is available
+  if (brokerUser?.ledgerBalanceClose < requiredMargin) {
+    toast.error("Insufficient Margin Balance to place the trade");
+    return;
+  }
+
+  // Prepare order data
   const orderData = {
     scriptName: info.find(item => item.SEM_SMST_SECURITY_ID === parseInt(selectedDataPoint?.securityId))?.SEM_TRADING_SYMBOL || 'Unknown',
     ltp: selectedDataPoint?.ltp || null,
     bidPrice: selectedDataPoint?.bidPrice || null,
-    askPrice: selectedDataPoint?.bidPrice || null,
+    askPrice: selectedDataPoint?.askPrice || null,
     ltq: selectedDataPoint?.ltq || null,
     orderType, // "BUY" or "SELL"
     lotSize: 1000,
@@ -84,31 +123,57 @@ useEffect(() => {
     isStopLossTarget,
     stopLoss: isStopLossTarget ? parseFloat(document.querySelector('input[placeholder="Stop Loss"]').value) || null : null,
     target: isStopLossTarget ? parseFloat(document.querySelector('input[placeholder="Target"]').value) || null : null,
-    margin: 7885, // Example value
-    carry: 7881, // Example value
-    marginLimit: 0, // Example value
-    userId: "USER_ID_HERE", // Replace with actual user ID
+    margin: requiredMargin,
+    carry: requiredMargin * 0.99,
+    marginLimit: 0,
+    userId: loginUsrid
   };
 
   try {
-    const response = await fetch("https://nex-trade-backend.vercel.app/api/v1/tradeorder", {
-      method: "POST",
+    // Call to update funds before placing the order
+    const updateResponse = await fetch(`http://localhost:4000/api/v1/brokerusers/${userId}/update-funds`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(orderData),
+      body: JSON.stringify({
+        margin: requiredMargin,
+        userId: userId // Send margin as the body to update funds
+      }),
     });
 
-    const result = await response.json();
-    if (result.success) {
-      toast.success(`Order placed successfully: ${orderType}`);
+    const updateResult = await updateResponse.json();
+
+    // Check if funds update was successful
+    if (updateResponse.ok && updateResult.success) {
+      // Proceed to place the order
+      const orderResponse = await fetch("http://localhost:4000/api/v1/tradeorder", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      const orderResult = await orderResponse.json();
+      if (orderResult.success) {
+        toast.success(`Order placed successfully: ${orderType}`);
+        fetchBrokerUser();
+      }
+      
+      else {
+        toast.error('Error placing order');
+      }
     } else {
-      toast.error('Error placing order');
+      toast.error(`Error updating funds: ${updateResult.message}`);
     }
   } catch (error) {
     console.error("Order submission error:", error);
+    toast.error('An error occurred while processing your order.');
   }
 };
+
+  
 
   
   // Load saved subscriptions from localStorage on mount
@@ -437,13 +502,13 @@ useEffect(() => {
           </div>
           <div>
             <p className="text-sm">Margin Available</p>
-            <p className="text-lg">₹0</p>
+            <p className="text-lg">₹{brokerUser ? brokerUser.ledgerBalanceClose - brokerUser.margin_used : 0}</p>
           </div>
          </div>
          <div className="flex justify-between">
          <div>
             <p className="text-sm">Margin Used</p>
-            <p className="text-lg">₹0</p>
+            <p className="text-lg">{brokerUser?.margin_used }</p>
           </div>
           <div>
             <p className="text-sm">M2M Available</p>
@@ -526,6 +591,8 @@ useEffect(() => {
         {isLoading ? (
           <p>Loading live data...</p>
         ) : (
+          <>
+          <div className='hidden md:block overflow-x-auto'>
           <table className='border border-gray-800 w-full border-collapse'>
             <thead>
               <tr className='bg-gray-800 text-white'>
@@ -593,8 +660,68 @@ useEffect(() => {
               })}
             </tbody>
           </table>
-          
+          </div>
+           {/* Mobile View (Card Format) */}
+           <div className='md:hidden space-y-4'>
+           {Object.values(liveData).map(dataPoint => {
+             const scriptName =
+               info.find(
+                 item =>
+                   item.SEM_SMST_SECURITY_ID ===
+                   parseInt(dataPoint.securityId)
+               )?.SEM_TRADING_SYMBOL || 'Unknown'
+
+             return (
+               <div
+                 key={dataPoint.securityId}
+                 className='bg-[#213743] shadow-md p-3 rounded-md'
+                 onClick={() => handleRowClick(dataPoint)}
+               >
+                 <div className='flex justify-between'>
+                   <span className='font-semibold text-xs'>Qty : 0</span>
+                   <span className='text-gray-100 text-xs'>
+                     LTP : {dataPoint?.ltp || 'N/A'}
+                   </span>
+                 </div>
+                 <div className='flex justify-between my-2 text-md'>
+                   <div>
+                     <span className='text-gray-100'>
+                       {scriptName.includes('-')
+                         ? scriptName.split('-')[0] // Show only before '-'
+                         : scriptName.length > 10
+                         ? scriptName.slice(0, 10) + '…' // Shorten long strings
+                         : scriptName}
+                     </span>
+                   </div>
+                   <div className='flex justify-between gap-x-5'>
+                     <span className='text-green-600'>
+                       {dataPoint?.bidPrice || 'N/A'}
+                     </span>
+                     <span className='text-red-600'>
+                       {dataPoint?.askPrice || 'N/A'}
+                     </span>
+                   </div>
+                 </div>
+                 <div className='flex justify-between'>
+                   <span className='text-gray-100 text-xs'>
+                     {scriptName.includes('-')
+                       ? scriptName.split('-')[1] // Show only before '-'
+                       : scriptName.length > 10
+                       ? scriptName.slice(0, 10) + '…' // Shorten long strings
+                       : scriptName}
+                   </span>
+
+                   <span className='text-gray-100 text-xs'>
+                     {dataPoint?.dhv || 'N/A'} ({dataPoint?.dlv || 'N/A'})
+                   </span>
+                 </div>
+               </div>
+             )
+           })}
+         </div>
+         </>
         )}
+        
  {selectedDataPoint && (
   <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center">
     <div className="bg-[#151f36] text-white p-6 rounded-lg w-[600px]">
@@ -705,9 +832,9 @@ useEffect(() => {
     </div>
   </div>
 )}
+</div>
 
-
-      </div>
+    
 
 
 
@@ -721,6 +848,7 @@ useEffect(() => {
  </div>
  <ToastContainer />
     </div>
+
   );
 };
 

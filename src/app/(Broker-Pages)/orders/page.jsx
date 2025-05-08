@@ -6,19 +6,37 @@ import { useEffect, useState } from "react";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
+import Cookies from 'js-cookie';
+import { useRouter } from "next/navigation";
+
 
 const OrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("executed");
+  const router = useRouter();
+  
+ useEffect(() => {
+      const userInfo = Cookies.get('userInfo');
+    
+      if (!userInfo) {
+        router.push('/login');
+      } else {
+        const user = JSON.parse(userInfo);
+    
+        if (!user.userId || (user.role !== 'Broker' && user.role !== 'Admin')) {
+          router.replace('/unauthorized'); 
+        }
+      }
+    }, []);
 
   useEffect(() => {
     const fetchOrders = async () => {
       setLoading(true);
       try {
         const endpoint = activeTab === "executed" 
-          ? "https://nex-trade-backend.vercel.app/api/v1/executed-orders"
-          : "https://nex-trade-backend.vercel.app/api/v1/limit-orders";
+          ? "http://localhost:4000/api/v1/executed-orders"
+          : "http://localhost:4000/api/v1/limit-orders";
         
         const response = await fetch(endpoint);
         const result = await response.json();
@@ -40,7 +58,7 @@ const OrdersPage = () => {
 
   const handleDelete = async (orderId) => {
     try {
-      const response = await fetch(`https://nex-trade-backend.vercel.app/api/v1/delete-order/${orderId}`, {
+      const response = await fetch(`http://localhost:4000/api/v1/delete-order/${orderId}`, {
         method: "DELETE",
       });
   

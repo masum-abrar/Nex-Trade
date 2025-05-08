@@ -19,15 +19,12 @@ const Navbar = () => {
     { label: "PAYIN-OUT", href: "/payinout" },
   ];
   const router = useRouter();
-
   const handleLogout = () => {
-    Cookies.remove('userId');  // Remove user ID
-    Cookies.remove('username'); // Remove username
-    Cookies.remove('role');
-    Cookies.remove('id');
-     // Remove role if needed
-
-    router.push('/login'); // Redirect to login page
+    Cookies.remove('userInfo'); 
+  
+  
+    
+    router.push('/login'); 
   };
   return (
     <nav className="bg-[#1A2C38] text-white p-4 border-b border-gray-700">

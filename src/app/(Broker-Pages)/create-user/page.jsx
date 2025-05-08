@@ -2,6 +2,8 @@
 import Navbar from '@/app/Components/Navbar'
 import Sidebar from '@/app/Components/Sidebar'
 import React, { useState,useEffect } from 'react'
+import Cookies from 'js-cookie'
+import { useRouter } from 'next/navigation'
 
 const ToggleSwitch = ({ label }) => {
   const [enabled, setEnabled] = useState(false)
@@ -29,6 +31,8 @@ const ToggleSwitch = ({ label }) => {
  
 
 const Page = () => {
+  
+  const router = useRouter();
   const [formData, setFormData] = useState({
     mcx_maxExchLots: 20,
     mcx_commission:200,
@@ -166,13 +170,31 @@ const Page = () => {
     handleChange({ target: { name: 'loginUsrid', value: generatedId } });
   }, []);
 
+
+  useEffect(() => {
+    const userInfo = Cookies.get('userInfo');
+    if (!userInfo) {
+      // User is not logged in, redirect to login page
+      router.replace('/login');
+      return;
+    }
+
+    const user = JSON.parse(userInfo);
+
+    // If user role is not 'admin', restrict access to create-user page
+    if (user?.role !== 'Admin') {
+      router.replace('/unauthorized'); // Redirect to unauthorized page
+    }
+  }, [router]);
+
   // Handle form submission
   const handleSubmit = async e => {
     e.preventDefault()
     console.log(formData)
     try {
+      formData.margin_used = 0;
       const response = await fetch(
-        'https://nex-trade-backend.vercel.app/api/v1/brokerusers',
+        'http://localhost:4000/api/v1/brokerusers',
         {
           method: 'POST',
           headers: {

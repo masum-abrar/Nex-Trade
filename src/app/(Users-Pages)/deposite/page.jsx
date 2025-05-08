@@ -1,15 +1,36 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 const Page = () => {
   const [formData, setFormData] = useState({
     depositAmount: '',
-    depositImage: null,
+    depositImage: '',
     loginUserId: '', // To store the loginUserId
     depositType: 'Deposit',
+    status : 'Pending',
      // Static value for Deposit
   });
+
+
+ const router = useRouter();
+       useEffect(() => {
+         const userInfo = Cookies.get('userInfo');
+       
+         if (!userInfo) {
+           router.push('/login');
+         } else {
+           const user = JSON.parse(userInfo);
+       
+           if (!user.userId || (user.role !== 'User')) {
+             router.replace('/unauthorized'); 
+           }
+         }
+       }, []);
 
   useEffect(() => {
     const storedUser = Cookies.get('userInfo');
@@ -32,26 +53,30 @@ const Page = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const payload = {
-      depositAmount: parseFloat(formData.depositAmount), // Ensure depositAmount is a float
-      depositImage: formData.depositImage,
-      loginUserId: formData.loginUserId, // Add the loginUserId to the payload
-      depositType: formData.depositType, // Add the Deposit type to the payload
-    };
-
+  
+    const amount = parseFloat(formData.depositAmount);
+  
+    if (amount < 1000) {
+      toast.error("You cannot Deposite less than ₹1000");
+      return;
+    }
+  
+    const formDataToSend = new FormData();
+    formDataToSend.append("depositAmount", formData.depositAmount);
+    formDataToSend.append("depositImage", formData.depositImage);
+    formDataToSend.append("loginUserId", formData.loginUserId);
+    formDataToSend.append("depositType", formData.depositType);
+    formDataToSend.append("status", formData.status);
+  
     try {
-      const response = await fetch('https://nex-trade-backend.vercel.app/api/v1/deposite', {
+      const response = await fetch('http://localhost:4000/api/v1/deposite', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+        body: formDataToSend,
       });
-
+  
       const data = await response.json();
       if (response.ok) {
-        alert('Deposit created successfully!');
+        toast.success('Deposit created successfully! wait for admin approval');
       } else {
         alert('Error creating deposit: ' + data.error);
       }
@@ -60,6 +85,7 @@ const Page = () => {
       alert('Error submitting form');
     }
   };
+  
 
   return (
     <div className="bg-gray-900 text-white min-h-screen flex justify-center items-center">
@@ -162,6 +188,7 @@ const Page = () => {
           <li>Amount will be withdrawn to the same account from which it was deposited.</li>
         </ul>
       </div>
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
     </div>
   );
 };
