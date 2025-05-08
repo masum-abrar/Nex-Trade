@@ -38,7 +38,7 @@ const Page = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/v1/brokerusers');
+        const res = await fetch('https://nex-trade-backend.vercel.app/api/v1/brokerusers');
         const data = await res.json();
         setUsers(data); // assuming data is an array
       } catch (err) {

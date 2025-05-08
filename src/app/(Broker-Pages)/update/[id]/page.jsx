@@ -126,7 +126,7 @@ const UpdatePage = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch(`http://localhost:4000/api/v1/brokerusers/${id}`);
+        const res = await fetch(`https://nex-trade-backend.vercel.app/api/v1/brokerusers/${id}`);
         const data = await res.json();
   
         if (data.success && data.user) {
@@ -326,7 +326,7 @@ STKOPT_sellingOvernight: user.STKOPT_sellingOvernight || '',
     };
   
     try {
-      const res = await fetch(`http://localhost:4000/api/v1/brokerusers/${id}`, {
+      const res = await fetch(`https://nex-trade-backend.vercel.app/api/v1/brokerusers/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(finalFormData),

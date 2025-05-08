@@ -31,7 +31,7 @@ const WithdrawRequestForm = () => {
        const userInfo = Cookies.get('userInfo');
        const userId = JSON.parse(userInfo).id; // Get the userId from the userInfo state
       try {
-        const res = await fetch(`http://localhost:4000/api/v1/brokerusers/${userId}`);
+        const res = await fetch(`https://nex-trade-backend.vercel.app/api/v1/brokerusers/${userId}`);
         const data = await res.json();
         if (data.success) {
           setBrokerUser(data.user);
@@ -104,7 +104,7 @@ const WithdrawRequestForm = () => {
     }
   
     try {
-      const res = await fetch('http://localhost:4000/api/v1/withdraw', {
+      const res = await fetch('https://nex-trade-backend.vercel.app/api/v1/withdraw', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

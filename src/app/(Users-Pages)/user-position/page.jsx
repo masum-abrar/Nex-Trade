@@ -43,7 +43,7 @@ useEffect(() => {
        useEffect(() => {
            const fetchExecutedOrders = async () => {
              try {
-                      const response = await fetch("http://localhost:4000/api/v1/executed-orders");
+                      const response = await fetch("https://nex-trade-backend.vercel.app/api/v1/executed-orders");
                       const result = await response.json();
                 
                       if (result.success) {
@@ -79,7 +79,7 @@ useEffect(() => {
   const fetchBrokerUser = async () => {
     const userId = userInfo?.id; // Get the userId from the userInfo state
     try {
-      const res = await fetch(`http://localhost:4000/api/v1/brokerusers/${userId}`);
+      const res = await fetch(`https://nex-trade-backend.vercel.app/api/v1/brokerusers/${userId}`);
       const data = await res.json();
       if (data.success) {
         setBrokerUser(data.user);

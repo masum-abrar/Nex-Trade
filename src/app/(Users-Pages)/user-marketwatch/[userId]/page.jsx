@@ -66,7 +66,7 @@ const visibleTabs = allowedSegments.flatMap(segment => segmentTabsMap[segment] |
 
 const fetchBrokerUser = async () => {
   try {
-    const res = await fetch(`http://localhost:4000/api/v1/brokerusers/${userId}`);
+    const res = await fetch(`https://nex-trade-backend.vercel.app/api/v1/brokerusers/${userId}`);
     const data = await res.json();
     if (data.success) {
       setBrokerUser(data.user);
@@ -131,7 +131,7 @@ const handleOrder = async (orderType) => {
 
   try {
     // Call to update funds before placing the order
-    const updateResponse = await fetch(`http://localhost:4000/api/v1/brokerusers/${userId}/update-funds`, {
+    const updateResponse = await fetch(`https://nex-trade-backend.vercel.app/api/v1/brokerusers/${userId}/update-funds`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -147,7 +147,7 @@ const handleOrder = async (orderType) => {
     // Check if funds update was successful
     if (updateResponse.ok && updateResult.success) {
       // Proceed to place the order
-      const orderResponse = await fetch("http://localhost:4000/api/v1/tradeorder", {
+      const orderResponse = await fetch("https://nex-trade-backend.vercel.app/api/v1/tradeorder", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

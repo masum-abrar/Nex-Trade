@@ -35,8 +35,8 @@ const OrdersPage = () => {
       setLoading(true);
       try {
         const endpoint = activeTab === "executed" 
-          ? "http://localhost:4000/api/v1/executed-orders"
-          : "http://localhost:4000/api/v1/limit-orders";
+          ? "https://nex-trade-backend.vercel.app/api/v1/executed-orders"
+          : "https://nex-trade-backend.vercel.app/api/v1/limit-orders";
         
         const response = await fetch(endpoint);
         const result = await response.json();
@@ -58,7 +58,7 @@ const OrdersPage = () => {
 
   const handleDelete = async (orderId) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/v1/delete-order/${orderId}`, {
+      const response = await fetch(`https://nex-trade-backend.vercel.app/api/v1/delete-order/${orderId}`, {
         method: "DELETE",
       });
   

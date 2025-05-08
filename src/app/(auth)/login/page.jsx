@@ -36,7 +36,7 @@ export default function LoginPage () {
       setSuccessMessage('');
   
       try {
-        const response = await fetch('http://localhost:4000/api/v1/loginbrokerusers', {
+        const response = await fetch('https://nex-trade-backend.vercel.app/api/v1/loginbrokerusers', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
