@@ -51,40 +51,50 @@ const Page = () => {
     setFormData({ ...formData, depositImage: e.target.files[0] });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    const amount = parseFloat(formData.depositAmount);
-  
-    if (amount < 1000) {
-      toast.error("You cannot Deposite less than ₹1000");
-      return;
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const amount = parseFloat(formData.depositAmount);
+
+  if (amount < 1000) {
+    toast.error("You cannot Deposite less than ₹1000");
+    return;
+  }
+
+  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+  const file = formData.depositImage;
+
+  if (file && file.size > MAX_FILE_SIZE) {
+    toast.error("Image too large. Maximum allowed size is 2MB.");
+    return;
+  }
+
+  const formDataToSend = new FormData();
+  formDataToSend.append("depositAmount", formData.depositAmount);
+  formDataToSend.append("depositImage", formData.depositImage);
+  formDataToSend.append("loginUserId", formData.loginUserId);
+  formDataToSend.append("depositType", formData.depositType);
+  formDataToSend.append("status", formData.status);
+
+  try {
+    const response = await fetch('https://nex-trade-backend.vercel.app/api/v1/deposite', {
+      method: 'POST',
+      body: formDataToSend,
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      toast.success('Deposit created successfully! wait for admin approval');
+    } else {
+      toast.error('Error creating deposit: ' + (data.error || 'Unknown error'));
     }
-  
-    const formDataToSend = new FormData();
-    formDataToSend.append("depositAmount", formData.depositAmount);
-    formDataToSend.append("depositImage", formData.depositImage);
-    formDataToSend.append("loginUserId", formData.loginUserId);
-    formDataToSend.append("depositType", formData.depositType);
-    formDataToSend.append("status", formData.status);
-  
-    try {
-      const response = await fetch('https://nex-trade-backend.vercel.app/api/v1/deposite', {
-        method: 'POST',
-        body: formDataToSend,
-      });
-  
-      const data = await response.json();
-      if (response.ok) {
-        toast.success('Deposit created successfully! wait for admin approval');
-      } else {
-        alert('Error creating deposit: ' + data.error);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Error submitting form');
-    }
-  };
+  } catch (error) {
+    console.error('Error:', error);
+    toast.error('Error submitting form');
+  }
+};
+
   
 
   return (
